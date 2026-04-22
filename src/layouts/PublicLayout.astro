@@ -1,0 +1,19 @@
+---
+import BaseLayout from './BaseLayout.astro'
+import Footer from '../components/Footer.astro'
+
+interface Props {
+  title: string
+  description: string
+  ogImage?: string
+  noindex?: boolean
+}
+
+const props = Astro.props
+---
+
+<BaseLayout {...props}>
+  <!-- Nav island goes here in Phase 3 step 10 -->
+  <slot />
+  <Footer />
+</BaseLayout>

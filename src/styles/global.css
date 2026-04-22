@@ -1,1 +1,135 @@
 @import "tailwindcss";
+
+/* ─── Tailwind 4 theme tokens ────────────────────────────────────────────────── */
+@theme {
+  --color-bg:         #0A0C10;
+  --color-surface:    #0E1220;
+  --color-brand:      #1A72E8;
+  --color-brand-lt:   #3D9EFF;
+  --color-accent:     #C85010;
+  --color-accent-lt:  #E06828;
+  --color-silver:     #A8BDD0;
+  --color-chrome:     #D8E8F4;
+  --color-text-main:  #F0F4F8;
+
+  --font-display: "Bebas Neue", sans-serif;
+  --font-ui:      "Rajdhani", sans-serif;
+  --font-body:    "DM Sans", sans-serif;
+}
+
+/* ─── CSS Custom Properties ──────────────────────────────────────────────────── */
+:root {
+  --color-dim: rgba(168, 189, 208, 0.55);
+
+  --chrome-gradient: linear-gradient(180deg,
+    #FFFFFF 0%, #EAF4FF 8%, #C4DCEE 20%,
+    #82AACC 35%, #4A7898 50%, #285878 62%,
+    #4A7898 75%, #90B8D4 88%, #C8E0F4 100%);
+
+  --copper-gradient: linear-gradient(180deg,
+    #F4A060 0%, #E06828 30%, #C85010 60%,
+    #8B3008 85%, #A04020 100%);
+
+  --blue-metallic: linear-gradient(180deg,
+    #88C0F0 0%, #3D9EFF 25%, #1A72E8 55%,
+    #0A4898 85%, #1858B8 100%);
+
+  --copper-backglow: radial-gradient(ellipse at center,
+    rgba(200,80,16,0.35) 0%,
+    rgba(200,80,16,0.15) 40%,
+    transparent 70%);
+
+  --chrome-rim-glow: 0 0 30px rgba(168,200,240,0.35),
+                     0 0 60px rgba(26,114,232,0.2);
+}
+
+/* ─── Base Reset ─────────────────────────────────────────────────────────────── */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text-main);
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 17px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* ─── Leather grain overlay ──────────────────────────────────────────────────── */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 200px 200px;
+  opacity: 0.028;
+  pointer-events: none;
+  z-index: 9998;
+  mix-blend-mode: overlay;
+}
+
+/* ─── Selection ──────────────────────────────────────────────────────────────── */
+::selection { background-color: #1A72E8; color: #ffffff; }
+
+/* ─── Scrollbar ──────────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #0E1220; }
+::-webkit-scrollbar-thumb { background: #1A72E8; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #3D9EFF; }
+* { scrollbar-width: thin; scrollbar-color: #1A72E8 #0E1220; }
+
+/* ─── Chrome text ────────────────────────────────────────────────────────────── */
+.chrome-text {
+  background: var(--chrome-gradient) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.8)) drop-shadow(0 0 12px rgba(168,200,240,0.18));
+}
+
+.copper-text {
+  background: var(--copper-gradient) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.8)) drop-shadow(0 0 16px rgba(200,80,16,0.3));
+}
+
+/* ─── Input focus ────────────────────────────────────────────────────────────── */
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: #1A72E8 !important;
+  box-shadow: 0 0 0 3px rgba(26,114,232,0.18), 0 0 24px rgba(26,114,232,0.15) !important;
+  transition: border-color 150ms, box-shadow 150ms;
+}
+
+/* ─── Animations ─────────────────────────────────────────────────────────────── */
+@keyframes chromeShimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.shimmer-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.25) 50%, transparent 100%);
+  background-size: 200% 100%;
+  animation: chromeShimmer 4s infinite;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 12px rgba(200,80,16,0.35), 0 4px 12px rgba(200,80,16,0.2); }
+  50%       { box-shadow: 0 0 32px rgba(200,80,16,0.8), 0 4px 20px rgba(200,80,16,0.5); }
+}
+.animate-pulse-glow { animation: pulse-glow 1.4s ease-in-out infinite; }
