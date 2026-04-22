@@ -1,0 +1,174 @@
+---
+import PublicLayout from '../layouts/PublicLayout.astro'
+const LAST_UPDATED = 'To be finalized upon attorney review'
+---
+
+<PublicLayout
+  title="Privacy Policy | Hyche International Management"
+  description="Privacy policy for Hyche International Management — how we collect, use, and protect your information."
+  noindex={true}
+>
+  <main class="legal-main">
+
+    <p class="eyebrow">Legal · Draft Pending Attorney Review</p>
+
+    <h1 class="legal-title">Privacy Policy</h1>
+
+    <p class="legal-date">Last updated: {LAST_UPDATED}</p>
+
+    <div class="legal-body">
+      <p>Hyche International Management ("we," "us," or "our") respects your privacy. This Privacy Policy explains what information we collect when you use our website, how we use it, and the choices you have.</p>
+
+      <h2>1. Information We Collect</h2>
+      <p>We collect information you voluntarily provide when you contact us, inquire about representation, or communicate with us through this website. This may include:</p>
+      <ul>
+        <li>Name and contact information (email address, phone number)</li>
+        <li>Athlete information (sport, school, year, statistics)</li>
+        <li>Parent or guardian contact information, when provided on behalf of a minor</li>
+        <li>Any messages or content you send to us through contact forms, email, or messaging platforms</li>
+      </ul>
+      <p>We also collect limited non-personal information automatically when you visit our website, including browser type, device type, pages visited, and approximate geographic location.</p>
+
+      <h2>2. How We Use Your Information</h2>
+      <p>We use the information you provide to:</p>
+      <ul>
+        <li>Respond to inquiries about representation or services</li>
+        <li>Evaluate potential athlete-agency fit</li>
+        <li>Communicate with you about services, updates, or relevant opportunities</li>
+        <li>Maintain accurate records of our client and prospect relationships</li>
+        <li>Comply with legal obligations</li>
+      </ul>
+      <p>We do not sell, rent, or trade your personal information to third parties for marketing purposes.</p>
+
+      <h2>3. Information About Minors</h2>
+      <p>Our services are often relevant to student-athletes under the age of 18. We do not knowingly collect information directly from minors without verifiable parental or guardian consent. If you are under 18, please have a parent or legal guardian submit any inquiry on your behalf.</p>
+      <p>Parents and guardians submitting information about a minor acknowledge that they are authorized to share that information with us for the purpose of evaluating representation or services.</p>
+
+      <h2>4. How We Share Information</h2>
+      <p>We do not share your personal information with third parties except in the following limited circumstances:</p>
+      <ul>
+        <li>With service providers who help us operate our business, who are bound by confidentiality obligations</li>
+        <li>When legally required, such as in response to a subpoena or court order</li>
+        <li>With your explicit consent (for example, when introducing an athlete to a potential brand partner)</li>
+        <li>To protect the rights, safety, or property of Hyche International Management, our clients, or others</li>
+      </ul>
+
+      <h2>5. Data Security</h2>
+      <p>We use reasonable administrative, technical, and physical safeguards to protect the information we collect. However, no system is completely secure, and we cannot guarantee absolute security of any information transmitted to or from us.</p>
+
+      <h2>6. Your Choices</h2>
+      <p>You may:</p>
+      <ul>
+        <li>Request access to the personal information we hold about you</li>
+        <li>Request correction or deletion of your personal information</li>
+        <li>Opt out of communications from us at any time by contacting us directly</li>
+      </ul>
+      <p>To make any of these requests, please contact us using the information at the bottom of this policy.</p>
+
+      <h2>7. Cookies and Tracking</h2>
+      <p>Our website may use cookies or similar technologies to improve functionality and analyze site usage. You can control cookies through your browser settings. Disabling cookies may affect certain site features.</p>
+
+      <h2>8. Third-Party Links</h2>
+      <p>Our website may contain links to third-party sites. We are not responsible for the privacy practices of those sites. We encourage you to review the privacy policies of any site you visit.</p>
+
+      <h2>9. Changes to This Policy</h2>
+      <p>We may update this Privacy Policy from time to time. When we do, we will update the "Last Updated" date above. Continued use of the website after changes are posted constitutes acceptance of the revised policy.</p>
+
+      <h2>10. Contact Us</h2>
+      <p>If you have questions about this Privacy Policy or how we handle your information, please contact us at:</p>
+      <p class="contact-block">
+        Hyche International Management<br/>
+        [Street Address]<br/>
+        Jackson, MS [ZIP]<br/>
+        chris@hycheims.com
+      </p>
+    </div>
+
+    <div class="draft-notice">
+      <p class="draft-label">Draft Notice</p>
+      <p>This Privacy Policy is a working draft pending review by legal counsel. It has not yet been finalized and should not be relied upon as definitive. A finalized, attorney-approved version will be published before any data is collected through site contact forms.</p>
+    </div>
+
+  </main>
+</PublicLayout>
+
+<style>
+  .legal-main {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 140px 24px 80px;
+    min-height: 80vh;
+  }
+  .eyebrow {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 0.72rem;
+    letter-spacing: 0.32em;
+    color: var(--color-accent);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .legal-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(48px, 5vw, 72px);
+    line-height: 0.95;
+    color: var(--color-chrome);
+    margin-bottom: 16px;
+  }
+  .legal-date {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--color-silver);
+    margin-bottom: 48px;
+    font-style: italic;
+  }
+  .legal-body {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    color: var(--color-silver);
+    line-height: 1.75;
+  }
+  .legal-body p { margin-bottom: 16px; }
+  .legal-body h2 {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 1.1rem;
+    letter-spacing: 0.1em;
+    color: var(--color-chrome);
+    text-transform: uppercase;
+    margin-top: 40px;
+    margin-bottom: 16px;
+  }
+  .legal-body ul {
+    margin-bottom: 20px;
+    margin-left: 24px;
+  }
+  .legal-body li { margin-bottom: 6px; }
+  .contact-block {
+    font-weight: 500;
+    color: var(--color-chrome) !important;
+  }
+  .draft-notice {
+    margin-top: 64px;
+    padding: 24px;
+    background-color: rgba(200,80,16,0.08);
+    border: 1px solid rgba(200,80,16,0.2);
+    border-left: 3px solid var(--color-accent);
+  }
+  .draft-label {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    font-size: 0.72rem;
+    letter-spacing: 0.2em;
+    color: var(--color-accent);
+    text-transform: uppercase;
+    margin-bottom: 8px !important;
+  }
+  .draft-notice p:last-child {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--color-silver);
+    line-height: 1.6;
+    margin-bottom: 0 !important;
+  }
+</style>

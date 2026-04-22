@@ -1,0 +1,132 @@
+---
+import PublicLayout from '../layouts/PublicLayout.astro'
+---
+
+<PublicLayout
+  title="Page Not Found | Hyche International Management"
+  description="The page you're looking for doesn't exist."
+>
+  <main class="not-found">
+    <div class="bg-number" aria-hidden="true">404</div>
+    <div class="glow" aria-hidden="true"></div>
+    <div class="content">
+      <p class="eyebrow">Error 404</p>
+      <h1 class="headline">Page Not Found.</h1>
+      <div class="divider"></div>
+      <p class="body">
+        The page you're looking for doesn't exist or has been moved. Head back to the homepage or reach out if you think something's broken.
+      </p>
+      <div class="actions">
+        <a href="/" class="btn-primary">Back to Home</a>
+        <a href="/contact" class="btn-secondary">Contact Us</a>
+      </div>
+    </div>
+  </main>
+</PublicLayout>
+
+<style>
+  .not-found {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 120px 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .bg-number {
+    position: absolute;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(200px, 40vw, 400px);
+    color: rgba(168,189,208,0.03);
+    line-height: 1;
+    user-select: none;
+    pointer-events: none;
+    letter-spacing: 0.05em;
+  }
+  .glow {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center, rgba(26,114,232,0.06) 0%, transparent 65%);
+    pointer-events: none;
+  }
+  .content {
+    position: relative;
+    z-index: 10;
+    max-width: 560px;
+    text-align: center;
+  }
+  .eyebrow {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 0.72rem;
+    letter-spacing: 0.32em;
+    color: var(--color-accent);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .headline {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(48px, 7vw, 88px);
+    line-height: 0.95;
+    color: var(--color-chrome);
+    margin-bottom: 24px;
+  }
+  .divider {
+    width: 48px;
+    height: 2px;
+    background: var(--color-accent);
+    margin: 0 auto 24px;
+  }
+  .body {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 17px;
+    color: var(--color-silver);
+    line-height: 1.75;
+    margin-bottom: 40px;
+  }
+  .actions {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 0.88rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: #fff;
+    background-color: var(--color-brand);
+    padding: 14px 32px;
+    border-radius: 4px;
+    border: 1px solid rgba(26,114,232,0.4);
+    box-shadow: 0 4px 20px rgba(26,114,232,0.3);
+    transition: opacity 150ms;
+  }
+  .btn-primary:hover { opacity: 0.85; }
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 0.88rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--color-silver);
+    background: transparent;
+    padding: 14px 32px;
+    border-radius: 4px;
+    border: 1px solid rgba(168,189,208,0.25);
+    transition: border-color 150ms, color 150ms;
+  }
+  .btn-secondary:hover {
+    border-color: rgba(168,189,208,0.5);
+    color: var(--color-chrome);
+  }
+</style>

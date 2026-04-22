@@ -1,0 +1,171 @@
+---
+import PublicLayout from '../layouts/PublicLayout.astro'
+const LAST_UPDATED = 'To be finalized upon attorney review'
+---
+
+<PublicLayout
+  title="Terms of Service | Hyche International Management"
+  description="Terms of service for Hyche International Management website."
+  noindex={true}
+>
+  <main class="legal-main">
+
+    <p class="eyebrow">Legal · Draft Pending Attorney Review</p>
+
+    <h1 class="legal-title">Terms of Service</h1>
+
+    <p class="legal-date">Last updated: {LAST_UPDATED}</p>
+
+    <div class="legal-body">
+      <p>Welcome to the Hyche International Management website. By accessing or using this website, you agree to these Terms of Service. If you do not agree, please do not use this website.</p>
+
+      <h2>1. About Us</h2>
+      <p>Hyche International Management ("we," "us," "our," or "the Agency") is a boutique athlete representation firm based in Jackson, Mississippi. This website provides information about our services and allows visitors to contact us regarding potential representation or brand partnerships.</p>
+
+      <h2>2. Use of This Website</h2>
+      <p>You may use this website for informational purposes, to learn about our services, and to contact us. You agree not to:</p>
+      <ul>
+        <li>Use the website for any unlawful purpose</li>
+        <li>Attempt to gain unauthorized access to any portion of the website or its systems</li>
+        <li>Interfere with the website's normal operation or security</li>
+        <li>Impersonate another person or misrepresent your identity</li>
+        <li>Submit false, misleading, or fraudulent information through any contact form</li>
+        <li>Use automated systems (bots, scrapers, etc.) to access or extract data from the website</li>
+      </ul>
+
+      <h2>3. No Representation Relationship Through Website Alone</h2>
+      <p><strong>Using this website or submitting information through its contact forms does not create an agent-client or agency-principal relationship.</strong> A formal representation relationship with Hyche International Management is established only by a signed written representation agreement between you and the Agency.</p>
+
+      <h2>4. Informational Content</h2>
+      <p>Information on this website — including content about athletes, services, NIL guidance, and agency practices — is provided for general informational purposes only. It is not:</p>
+      <ul>
+        <li>Legal advice</li>
+        <li>Financial advice</li>
+        <li>Tax advice</li>
+        <li>A guarantee of any outcome or result</li>
+      </ul>
+      <p>Athletes, families, and brands should consult qualified legal, financial, and tax professionals before making decisions based on information found on this website.</p>
+
+      <h2>5. Athlete Profiles and Content</h2>
+      <p>Athletes featured on this website are represented by Hyche International Management under signed agreements. Their names, likenesses, statistics, and related content are displayed with their consent (or the consent of their parent or legal guardian, where applicable). Any use of this content by third parties requires express written permission.</p>
+
+      <h2>6. Intellectual Property</h2>
+      <p>All content on this website — including logos, text, graphics, photographs, videos, and design — is owned by or licensed to Hyche International Management and protected by copyright, trademark, and other intellectual property laws. You may not copy, reproduce, modify, or distribute any content from this website without our prior written permission, except for personal, non-commercial viewing.</p>
+
+      <h2>7. Third-Party Links and Services</h2>
+      <p>This website may contain links to third-party websites or services. We do not control and are not responsible for the content, privacy practices, or availability of third-party sites. Your use of those sites is at your own risk and subject to their terms.</p>
+
+      <h2>8. Disclaimer of Warranties</h2>
+      <p>This website is provided "as is" and "as available" without warranties of any kind, express or implied. We do not warrant that the website will be uninterrupted, error-free, secure, or free of viruses or other harmful components. Your use of the website is at your own risk.</p>
+
+      <h2>9. Limitation of Liability</h2>
+      <p>To the maximum extent permitted by law, Hyche International Management, its owners, employees, and affiliates shall not be liable for any indirect, incidental, consequential, or punitive damages arising from your use of or inability to use this website.</p>
+
+      <h2>10. Governing Law</h2>
+      <p>These Terms of Service are governed by the laws of the State of Mississippi, without regard to its conflict-of-laws principles. Any disputes arising from these terms or your use of this website shall be resolved in the state or federal courts located in Hinds County, Mississippi.</p>
+
+      <h2>11. NCAA and NIL Compliance</h2>
+      <p>Hyche International Management complies with applicable NCAA rules, state NIL laws, and institutional policies governing athlete representation and name, image, and likeness activities. However, NIL regulations vary by state, institution, and sport, and are subject to change. Athletes and families remain responsible for understanding and complying with the rules that apply to their specific situation. Nothing on this website constitutes legal advice regarding NIL compliance.</p>
+
+      <h2>12. Changes to These Terms</h2>
+      <p>We may update these Terms of Service at any time. Changes will be effective upon posting. Your continued use of the website after changes are posted constitutes acceptance of the revised terms.</p>
+
+      <h2>13. Contact</h2>
+      <p>For questions about these Terms of Service, contact:</p>
+      <p class="contact-block">
+        Hyche International Management<br/>
+        [Street Address]<br/>
+        Jackson, MS [ZIP]<br/>
+        chris@hycheims.com
+      </p>
+    </div>
+
+    <div class="draft-notice">
+      <p class="draft-label">Draft Notice</p>
+      <p>These Terms of Service are a working draft pending review by legal counsel. They have not yet been finalized and should not be relied upon as definitive. A finalized, attorney-approved version will be published before any data is collected through site contact forms.</p>
+    </div>
+
+  </main>
+</PublicLayout>
+
+<style>
+  .legal-main {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 140px 24px 80px;
+    min-height: 80vh;
+  }
+  .eyebrow {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 0.72rem;
+    letter-spacing: 0.32em;
+    color: var(--color-accent);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .legal-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(48px, 5vw, 72px);
+    line-height: 0.95;
+    color: var(--color-chrome);
+    margin-bottom: 16px;
+  }
+  .legal-date {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--color-silver);
+    margin-bottom: 48px;
+    font-style: italic;
+  }
+  .legal-body {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    color: var(--color-silver);
+    line-height: 1.75;
+  }
+  .legal-body p { margin-bottom: 16px; }
+  .legal-body strong { color: var(--color-chrome); }
+  .legal-body h2 {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 1.1rem;
+    letter-spacing: 0.1em;
+    color: var(--color-chrome);
+    text-transform: uppercase;
+    margin-top: 40px;
+    margin-bottom: 16px;
+  }
+  .legal-body ul {
+    margin-bottom: 20px;
+    margin-left: 24px;
+  }
+  .legal-body li { margin-bottom: 6px; }
+  .contact-block {
+    font-weight: 500;
+    color: var(--color-chrome) !important;
+  }
+  .draft-notice {
+    margin-top: 64px;
+    padding: 24px;
+    background-color: rgba(200,80,16,0.08);
+    border: 1px solid rgba(200,80,16,0.2);
+    border-left: 3px solid var(--color-accent);
+  }
+  .draft-label {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    font-size: 0.72rem;
+    letter-spacing: 0.2em;
+    color: var(--color-accent);
+    text-transform: uppercase;
+    margin-bottom: 8px !important;
+  }
+  .draft-notice p:last-child {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--color-silver);
+    line-height: 1.6;
+    margin-bottom: 0 !important;
+  }
+</style>

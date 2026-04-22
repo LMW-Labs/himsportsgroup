@@ -1,0 +1,627 @@
+---
+import PublicLayout from '../layouts/PublicLayout.astro'
+
+const founder = {
+  name: 'Chris Hyche',
+  title: 'Founder & CEO',
+  photoUrl: '/assets/hyche_portrait.png',
+  initials: 'CH',
+  headline: 'Jackson, Mississippi native. Former Harlem Globetrotter. Built for the next generation.',
+  bio: `Chris Hyche is a Jackson, Mississippi native who built his career the way he now builds his clients' — through discipline, relationships, and a refusal to take shortcuts. A former Dandy Dozen honoree at Provine High School, he played college basketball at Jackson State University before finishing his eligibility at Talladega College.
+
+After college, Chris took his game international — playing professionally in Mexico, Kosovo, and Morocco before joining the Jackson Showboats of the ABA. In 2018, he became a Harlem Globetrotter, performing across 38 states and more than 26 countries under the stage name "Animal."
+
+That global stage gave him something most agents never experience — a real understanding of what it means to build a brand, connect with audiences, and represent something bigger than yourself. It's the foundation Hyche International Management Sports Group is built on today.`,
+  credentials: [
+    { label: '26+', sublabel: 'Countries Played' },
+    { label: '38+', sublabel: 'States Traveled' },
+    { label: '4',   sublabel: 'Pro Leagues' },
+    { label: '2018', sublabel: 'Joined Globetrotters' },
+  ],
+  timeline: [
+    { year: '2007', event: 'Enrolled at Jackson State University' },
+    { year: '2012', event: 'Completed college eligibility at Talladega College' },
+    { year: '2013', event: 'Began professional career — Jackson Showboats (ABA)' },
+    { year: '2014', event: 'International professional play — Mexico, Kosovo, Morocco' },
+    { year: '2018', event: 'Joined the Harlem Globetrotters as "Animal"' },
+    { year: '2018+', event: 'Toured 38+ states and 26+ countries worldwide' },
+    { year: '2024', event: 'Founded Hyche International Management Sports Group in Jackson, MS' },
+  ],
+  uniqueAngle: 'Grew up with deaf parents. Native ASL speaker. Active in deaf community outreach and anti-bullying programs nationwide. Understands communication across barriers at a level most agents never encounter.',
+}
+
+const values = [
+  { number: '01', title: 'Integrity', desc: "We tell athletes the truth, even when it's not what they want to hear. Honest counsel builds careers that last." },
+  { number: '02', title: 'Boutique Attention', desc: 'Every athlete on our roster gets direct access to leadership. No assistants, no hand-offs — just real representation.' },
+  { number: '03', title: 'Long-Term Vision', desc: 'We turn down short-term deals that compromise long-term brand equity. Career arcs matter more than one-time paydays.' },
+  { number: '04', title: 'Entertainment Network', desc: "Our roots in global entertainment open doors that pure sports agencies simply can't. Culture is our currency." },
+]
+
+const photos = [
+  { src: '/assets/action.jpg',            caption: 'On The Court' },
+  { src: '/assets/animal.jpeg',           caption: 'The Animal · Harlem Globetrotters' },
+  { src: '/assets/with_lakers_owner.jpg', caption: 'Building The Network' },
+  { src: '/assets/community_event.jpg',   caption: 'Community First' },
+]
+
+const bioParagraphs = founder.bio.trim().split('\n\n')
+
+const schemaJson = JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "Christopher Hyche",
+  "alternateName": "Chris 'Animal' Hyche",
+  "jobTitle": "Founder",
+  "worksFor": { "@type": "Organization", "name": "Hyche International Management Sports Group" },
+  "birthPlace": "Jackson, Mississippi",
+  "alumniOf": ["Provine High School", "Jackson State University", "Talladega College"],
+  "knowsLanguage": ["English", "American Sign Language"],
+  "description": "Former Harlem Globetrotter and professional basketball player. Founder of Hyche International Management Sports Group, a boutique NIL and athlete representation agency based in Jackson, Mississippi."
+})
+---
+
+<PublicLayout
+  title="Our Story | Hyche International Management Sports Group"
+  description="Hyche International Management was founded by Chris Hyche — former Harlem Globetrotter, Mississippi native, international pro who performed on 6 continents. That lived experience shapes every deal we negotiate."
+>
+
+  <script type="application/ld+json" set:html={schemaJson} />
+
+  <!-- ── Hero ───────────────────────────────────────────────────────────────── -->
+  <section class="hero reveal">
+    <div class="hero-glow" aria-hidden="true"></div>
+    <div class="container">
+      <p class="eyebrow">The Agency</p>
+      <h1 class="chrome-text hero-title">Our Story</h1>
+      <p class="hero-body">
+        Built by someone who lived the life athletes aspire to — and is now dedicated to opening those same doors for the next generation.
+      </p>
+    </div>
+  </section>
+
+  <!-- ── Founder ────────────────────────────────────────────────────────────── -->
+  <section class="founder-section">
+    <div class="container">
+      <div class="founder-grid">
+
+        <!-- Left: photo + name + credentials -->
+        <div class="founder-left reveal">
+          <div class="photo-frame">
+            <img
+              src={founder.photoUrl}
+              alt={founder.name}
+              class="founder-photo"
+              onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"
+            />
+            <div class="photo-placeholder" style="display:none">
+              <div class="photo-initials">{founder.initials}</div>
+              <div class="photo-placeholder-label">Photo Coming Soon</div>
+            </div>
+            <div class="photo-accent-bar" aria-hidden="true"></div>
+          </div>
+
+          <div class="founder-name-block">
+            <h2 class="chrome-text founder-name">{founder.name}</h2>
+            <p class="founder-title">{founder.title}</p>
+          </div>
+
+          <div class="credentials-grid">
+            {founder.credentials.map(c => (
+              <div class="cred-item">
+                <div class="chrome-text cred-label">{c.label}</div>
+                <div class="cred-sublabel">{c.sublabel}</div>
+              </div>
+            ))}
+          </div>
+
+          <div class="unique-angle">
+            <p>{founder.uniqueAngle}</p>
+          </div>
+        </div>
+
+        <!-- Right: story + quote + timeline -->
+        <div class="founder-right reveal" style="--delay:0.1s">
+          <div>
+            <p class="eyebrow">The Globetrotter Edge</p>
+            <div class="founder-subtitle">
+              <div class="chrome-text">From Jackson</div>
+              <div class="copper-text">To The World.</div>
+              <div class="chrome-text">And Back.</div>
+            </div>
+          </div>
+
+          <div class="bio-paragraphs">
+            {bioParagraphs.map((para, i) => (
+              <p class={i === 0 ? 'bio-p bio-p--primary' : 'bio-p bio-p--secondary'}>{para}</p>
+            ))}
+          </div>
+
+          <blockquote class="pull-quote">
+            <p>"GREAT AGENTS DIDN'T JUST WATCH THE GAME — THEY LIVED IT."</p>
+          </blockquote>
+
+          <div class="timeline">
+            <p class="timeline-heading">Career Timeline</p>
+            {founder.timeline.map((t, i) => (
+              <div class={`timeline-row${i < founder.timeline.length - 1 ? ' timeline-row--bordered' : ''}`}>
+                <span class="timeline-year">{t.year}</span>
+                <span class="timeline-event">{t.event}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Beyond the Game ────────────────────────────────────────────────────── -->
+  <section class="beyond-section reveal">
+    <div class="container">
+      <div class="beyond-header">
+        <p class="eyebrow">Beyond the Game</p>
+        <div class="beyond-title">
+          <div class="chrome-text">Representation</div>
+          <div class="copper-text">Built On More</div>
+          <div class="chrome-text">Than Basketball.</div>
+        </div>
+      </div>
+
+      <div class="beyond-grid">
+        <div class="beyond-left">
+          <p class="beyond-p beyond-p--primary">Chris grew up in a household where both of his parents were deaf. American Sign Language was his first language, and communication without barriers became second nature. That foundation — knowing how to reach people, how to listen, how to connect across difference — is built into every client relationship he manages today.</p>
+          <p class="beyond-p beyond-p--secondary">These experiences shaped how Hyche International operates. Every client relationship is built on communication, trust, and long-term thinking. Every deal is evaluated not just by dollar figure, but by what it means for the athlete's life, family, and legacy.</p>
+        </div>
+
+        <div class="pillar-cards">
+          {[
+            { icon: '🤟', title: 'Language of Inclusion', body: 'Fluent in American Sign Language. Active in deaf community outreach and anti-bullying programs across schools nationwide.' },
+            { icon: '🏠', title: 'Mississippi Roots', body: 'From Provine High to the world stage and back. Every client gets the same Southern-raised discipline and loyalty that built the career.' },
+            { icon: '🌍', title: 'Global Perspective', body: 'Played professionally in four countries and performed in 26+ more. Understands what it takes to represent a brand on any stage.' },
+          ].map(card => (
+            <div class="pillar-card">
+              <div class="pillar-icon">{card.icon}</div>
+              <div class="chrome-text pillar-title">{card.title}</div>
+              <p class="pillar-body">{card.body}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Photo Gallery ─────────────────────────────────────────────────────── -->
+  <section class="gallery-section">
+    <div class="container">
+      <p class="eyebrow">In The Arena</p>
+      <div class="gallery-grid">
+        {photos.map(photo => (
+          <div class="gallery-item">
+            <div class="chrome-top-edge" aria-hidden="true"></div>
+            <div class="gallery-img-wrap">
+              <img src={photo.src} alt={`Chris Hyche — ${photo.caption}`} class="gallery-img" />
+            </div>
+            <div class="gallery-caption">
+              <p>{photo.caption}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Mission ───────────────────────────────────────────────────────────── -->
+  <section class="mission-section reveal">
+    <div class="mission-inner">
+      <p class="eyebrow">Our Purpose</p>
+      <h2 class="chrome-text mission-title">Our Mission</h2>
+      <p class="mission-body">
+        Hyche International Management Sports Group was founded on the belief that athletes deserve representation from someone who understands the journey. We're boutique by design, global by experience, and personal by commitment. Every roster decision is made with intention. Every deal is negotiated with the athlete's full career in mind — not just the next signing bonus.
+      </p>
+    </div>
+  </section>
+
+  <!-- ── Values ────────────────────────────────────────────────────────────── -->
+  <section class="values-section">
+    <div class="container">
+      <div class="values-header reveal">
+        <p class="eyebrow">What Drives Us</p>
+        <h2 class="chrome-text values-title">Our Values</h2>
+      </div>
+      <div class="values-grid">
+        {values.map((v, i) => (
+          <div class="value-card reveal" style={`--delay:${i * 0.1}s`}>
+            <p class="value-number">{v.number}</p>
+            <h3 class="chrome-text value-title">{v.title}</h3>
+            <p class="value-desc">{v.desc}</p>
+            <div class="value-accent" aria-hidden="true"></div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- ── CTA ───────────────────────────────────────────────────────────────── -->
+  <section class="cta-section">
+    <div class="cta-inner">
+      <h2 class="chrome-text cta-title">Ready To Work With Us?</h2>
+      <div class="cta-actions">
+        <a href="/contact" class="btn-primary">Join Our Roster →</a>
+        <a href="/contact" class="btn-secondary">Contact Us</a>
+      </div>
+    </div>
+  </section>
+
+</PublicLayout>
+
+<style>
+  /* ── Layout helpers ── */
+  .container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 clamp(24px, 4vw, 96px);
+    position: relative;
+    z-index: 1;
+  }
+  .eyebrow {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 0.68rem;
+    letter-spacing: 0.32em;
+    color: var(--color-accent);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .copper-text {
+    background: linear-gradient(180deg, #F4A060 0%, #E06828 30%, #C85010 60%, #8B3008 85%, #A04020 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ── Scroll reveal ── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 0.65s ease, transform 0.65s ease;
+    transition-delay: var(--delay, 0s);
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ── Hero ── */
+  .hero {
+    padding-top: 160px;
+    padding-bottom: 80px;
+    background-color: var(--color-bg);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-glow {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 20% 50%, rgba(200,80,16,0.07) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(64px, 10vw, 120px);
+    line-height: 0.92;
+    margin-bottom: 28px;
+  }
+  .hero-body {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 19px;
+    color: var(--color-silver);
+    max-width: 560px;
+    line-height: 1.65;
+  }
+
+  /* ── Founder ── */
+  .founder-section { padding: 80px 0; background-color: var(--color-surface); }
+  .founder-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 64px;
+    align-items: start;
+  }
+  .founder-left { display: flex; flex-direction: column; gap: 24px; }
+  .photo-frame {
+    width: 100%; max-width: 400px;
+    aspect-ratio: 3/4;
+    background-color: var(--color-bg);
+    border: 1px solid rgba(168,189,208,0.12);
+    position: relative; overflow: hidden;
+  }
+  .founder-photo { width: 100%; height: 100%; object-fit: cover; object-position: top; }
+  .photo-placeholder {
+    width: 100%; height: 100%;
+    align-items: center; justify-content: center;
+    text-align: center; flex-direction: column;
+  }
+  .photo-initials {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 80px;
+    color: rgba(26,114,232,0.2);
+    line-height: 1;
+    margin-bottom: 12px;
+  }
+  .photo-placeholder-label {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    color: rgba(168,189,208,0.3);
+    text-transform: uppercase;
+  }
+  .photo-accent-bar {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 4px;
+    background: linear-gradient(90deg, var(--color-accent), transparent);
+  }
+  .founder-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.4rem; line-height: 1;
+    margin-bottom: 6px; letter-spacing: 0.04em;
+  }
+  .founder-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600; font-size: 0.78rem;
+    letter-spacing: 0.22em; color: var(--color-accent);
+    text-transform: uppercase;
+  }
+  .credentials-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+  }
+  .cred-item { text-align: center; }
+  .cred-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem; line-height: 1; margin-bottom: 4px;
+  }
+  .cred-sublabel {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600; font-size: 0.58rem;
+    letter-spacing: 0.18em;
+    color: rgba(168,189,208,0.55);
+    text-transform: uppercase;
+  }
+  .unique-angle {
+    background-color: rgba(26,114,232,0.06);
+    border: 1px solid rgba(26,114,232,0.2);
+    border-left: 3px solid var(--color-brand);
+    padding: 16px 20px;
+  }
+  .unique-angle p {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px; color: var(--color-silver);
+    line-height: 1.6; font-style: italic;
+  }
+  .founder-right { display: flex; flex-direction: column; gap: 32px; }
+  .founder-subtitle {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(36px, 4vw, 58px);
+    line-height: 0.95; margin-bottom: 8px;
+  }
+  .bio-paragraphs { display: flex; flex-direction: column; gap: 18px; }
+  .bio-p {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px; line-height: 1.75;
+  }
+  .bio-p--primary { color: var(--color-silver); }
+  .bio-p--secondary { color: rgba(168,189,208,0.75); }
+  .pull-quote {
+    border-left: 3px solid var(--color-accent);
+    padding-left: 20px; margin: 8px 0;
+  }
+  .pull-quote p {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(20px, 2.5vw, 28px);
+    color: var(--color-chrome); line-height: 1.2;
+    letter-spacing: 0.02em;
+  }
+  .timeline { display: flex; flex-direction: column; }
+  .timeline-heading {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700; font-size: 0.65rem;
+    letter-spacing: 0.28em;
+    color: rgba(168,189,208,0.4);
+    text-transform: uppercase; margin-bottom: 16px;
+  }
+  .timeline-row {
+    display: flex; align-items: flex-start;
+    gap: 20px; padding: 14px 0;
+  }
+  .timeline-row--bordered { border-bottom: 1px solid rgba(168,189,208,0.06); }
+  .timeline-year {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700; font-size: 0.8rem;
+    color: var(--color-accent); letter-spacing: 0.1em;
+    flex-shrink: 0; margin-top: 1px; min-width: 36px;
+  }
+  .timeline-event {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13.5px;
+    color: rgba(168,189,208,0.7); line-height: 1.5;
+  }
+
+  /* ── Beyond ── */
+  .beyond-section { padding: 100px 0; background-color: var(--color-bg); }
+  .beyond-header { margin-bottom: 64px; }
+  .beyond-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(44px, 6vw, 80px); line-height: 0.92;
+  }
+  .beyond-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 64px; align-items: start;
+  }
+  .beyond-left { display: flex; flex-direction: column; gap: 20px; }
+  .beyond-p { font-family: 'DM Sans', sans-serif; font-size: 15px; line-height: 1.75; }
+  .beyond-p--primary { color: var(--color-silver); }
+  .beyond-p--secondary { color: rgba(168,189,208,0.75); }
+  .pillar-cards { display: flex; flex-direction: column; gap: 16px; }
+  .pillar-card {
+    background-color: var(--color-surface);
+    border-left: 3px solid var(--color-accent);
+    padding: 24px 28px;
+    box-shadow: inset 0 1px 0 rgba(216,232,244,0.07), 0 0 0 1px rgba(168,189,208,0.08);
+    transition: box-shadow 250ms;
+  }
+  .pillar-card:hover {
+    box-shadow: inset 0 1px 0 rgba(216,232,244,0.12), 0 0 0 1px rgba(200,80,16,0.3), 0 0 24px rgba(200,80,16,0.1);
+  }
+  .pillar-icon { font-size: 1.4rem; margin-bottom: 10px; }
+  .pillar-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem; letter-spacing: 0.06em; margin-bottom: 8px;
+  }
+  .pillar-body {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13.5px; color: rgba(168,189,208,0.65); line-height: 1.65;
+  }
+
+  /* ── Gallery ── */
+  .gallery-section { padding: 80px 0; background-color: var(--color-bg); }
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 10px; margin-top: 24px;
+  }
+  .gallery-item {
+    position: relative; overflow: hidden;
+    box-shadow: inset 0 0 0 1px rgba(168,189,208,0.10), 0 4px 20px rgba(0,0,0,0.5);
+    transition: box-shadow 300ms;
+  }
+  .gallery-item:hover {
+    box-shadow: inset 0 0 0 1px rgba(200,80,16,0.4), 0 8px 32px rgba(0,0,0,0.7), 0 0 40px rgba(200,80,16,0.1);
+  }
+  .chrome-top-edge {
+    position: absolute; top: 0; left: 10%; right: 10%; height: 1px; z-index: 2;
+    background: linear-gradient(90deg, transparent, rgba(216,232,244,0.5), transparent);
+  }
+  .gallery-img-wrap { aspect-ratio: 4/3; overflow: hidden; }
+  .gallery-img {
+    width: 100%; height: 100%; object-fit: cover; object-position: top;
+    display: block; transition: transform 500ms ease;
+  }
+  .gallery-item:hover .gallery-img { transform: scale(1.04); }
+  .gallery-caption {
+    background-color: var(--color-surface);
+    border-top: 1px solid rgba(168,189,208,0.08);
+    padding: 12px 16px;
+  }
+  .gallery-caption p {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700; font-size: 0.7rem;
+    letter-spacing: 0.2em; color: var(--color-silver);
+    text-transform: uppercase; margin: 0;
+  }
+
+  /* ── Mission ── */
+  .mission-section { padding: 100px 0; background-color: var(--color-bg); }
+  .mission-inner {
+    max-width: 760px; margin: 0 auto;
+    padding: 0 clamp(24px, 4vw, 96px); text-align: center;
+  }
+  .mission-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(44px, 6vw, 72px);
+    line-height: 0.92; margin-bottom: 32px;
+  }
+  .mission-body {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 17px; color: var(--color-silver); line-height: 1.75;
+  }
+
+  /* ── Values ── */
+  .values-section { padding: 80px 0 100px; background-color: var(--color-surface); }
+  .values-header { text-align: center; margin-bottom: 56px; }
+  .values-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(40px, 5vw, 64px); line-height: 0.92;
+  }
+  .values-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+  }
+  .value-card {
+    background-color: var(--color-bg);
+    border: 1px solid rgba(168,189,208,0.08);
+    padding: 40px; position: relative; overflow: hidden;
+    transition: transform 250ms;
+  }
+  .value-card:hover { transform: translateY(-4px); }
+  .value-number {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700; font-size: 0.65rem;
+    color: rgba(200,80,16,0.5);
+    letter-spacing: 0.3em; text-transform: uppercase; margin-bottom: 16px;
+  }
+  .value-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem; line-height: 1; margin-bottom: 14px;
+  }
+  .value-desc {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13.5px; color: rgba(168,189,208,0.65); line-height: 1.7;
+  }
+  .value-accent {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--color-accent), transparent);
+    opacity: 0; transition: opacity 250ms;
+  }
+  .value-card:hover .value-accent { opacity: 1; }
+
+  /* ── CTA ── */
+  .cta-section {
+    padding: 80px 0;
+    background-color: var(--color-bg);
+    border-top: 1px solid rgba(168,189,208,0.08);
+  }
+  .cta-inner {
+    max-width: 600px; margin: 0 auto;
+    padding: 0 24px; text-align: center;
+  }
+  .cta-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(40px, 6vw, 68px);
+    line-height: 0.92; margin-bottom: 36px;
+  }
+  .cta-actions { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; }
+  .btn-primary {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700; font-size: 0.88rem;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    text-decoration: none; color: #fff;
+    background: linear-gradient(135deg, #C85010, #E06828);
+    padding: 14px 32px; border-radius: 4px;
+    transition: opacity 150ms;
+  }
+  .btn-primary:hover { opacity: 0.88; }
+  .btn-secondary {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700; font-size: 0.88rem;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    text-decoration: none; color: var(--color-chrome);
+    border: 1px solid rgba(216,232,244,0.25);
+    padding: 14px 32px; border-radius: 4px;
+    transition: border-color 150ms, color 150ms;
+  }
+  .btn-secondary:hover {
+    border-color: rgba(216,232,244,0.5);
+    color: #fff;
+  }
+</style>
+
+<!-- Intersection Observer for scroll reveals -->
+<script>
+  const els = document.querySelectorAll('.reveal')
+  const observer = new IntersectionObserver(
+    entries => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target) } }),
+    { threshold: 0.1, rootMargin: '-60px' }
+  )
+  els.forEach(el => observer.observe(el))
+</script>

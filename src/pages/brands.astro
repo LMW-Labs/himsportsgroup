@@ -1,0 +1,221 @@
+---
+import PublicLayout from '../layouts/PublicLayout.astro'
+
+const valueProps = [
+  {
+    number: '01',
+    title: 'Athlete-Aligned Campaign Strategy',
+    body: 'We start with the athlete — their audience, their values, their platform — and build campaigns that feel authentic because they are. No forced fits. No square-peg-round-hole placements.',
+  },
+  {
+    number: '02',
+    title: 'Content & Partnership Negotiation',
+    body: 'From first outreach to signed contracts, we manage every step of the athlete endorsement process. You get a partner in the deal, not a middleman.',
+  },
+  {
+    number: '03',
+    title: 'Performance Reporting & Analytics',
+    body: 'Post-campaign reporting, ROI tracking, and audience insights that tell you exactly what worked and why — so every partnership gets smarter over time.',
+  },
+]
+---
+
+<PublicLayout
+  title="For Brands | Hyche International Management"
+  description="Connect your brand with the athletes your audience already follows. NIL endorsements, campaign management, and full-service brand-athlete partnerships."
+>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-glow" aria-hidden="true"></div>
+    <div class="container">
+      <p class="eyebrow">For Brands</p>
+      <h1 class="hero-title">
+        Connect Your Brand<br/>
+        To The Athletes<br/>
+        <span class="copper-text">Your Audience Follows.</span>
+      </h1>
+      <p class="hero-body">
+        We connect forward-thinking brands with the athletes your audience already trusts — from NIL endorsements to full integrated campaign management. Boutique access. Real relationships. Deals that move the needle.
+      </p>
+      <a href="/contact?type=brand" class="cta-btn">Partner With Us →</a>
+    </div>
+  </section>
+
+  <!-- Value props -->
+  <section class="value-section">
+    <div class="container">
+      <div class="value-header">
+        <p class="eyebrow">What We Offer</p>
+        <h2 class="value-title">Built For Brand Partnerships<br/>That Actually Work.</h2>
+      </div>
+      <div class="cards-grid">
+        {valueProps.map(prop => (
+          <div class="card">
+            <p class="card-number">{prop.number}</p>
+            <h3 class="card-title">{prop.title}</h3>
+            <p class="card-body">{prop.body}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section">
+    <div class="cta-inner">
+      <p class="eyebrow">Let's Build Together</p>
+      <h2 class="cta-title">Ready To Connect Your<br/>Brand?</h2>
+      <p class="cta-body">
+        Every successful partnership starts with a single conversation. Tell us about your brand and we'll identify the right athletes, strategy, and deal structure.
+      </p>
+      <a href="/contact?type=brand" class="cta-btn">Partner With Us →</a>
+    </div>
+  </section>
+
+</PublicLayout>
+
+<style>
+  .hero {
+    padding-top: 160px;
+    padding-bottom: 80px;
+    background-color: var(--color-bg);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-glow {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 80% 50%, rgba(26,114,232,0.06) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 clamp(24px, 4vw, 96px);
+    position: relative;
+    z-index: 1;
+  }
+  .eyebrow {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 0.72rem;
+    letter-spacing: 0.32em;
+    color: var(--color-accent);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(52px, 9vw, 100px);
+    line-height: 0.92;
+    color: var(--color-chrome);
+    margin-bottom: 28px;
+  }
+  .copper-text {
+    background: linear-gradient(180deg, #F4A060 0%, #E06828 30%, #C85010 60%, #8B3008 85%, #A04020 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero-body {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 19px;
+    color: var(--color-silver);
+    max-width: 560px;
+    line-height: 1.65;
+    margin-bottom: 40px;
+  }
+  .cta-btn {
+    display: inline-flex;
+    align-items: center;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 0.88rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: #fff;
+    background: linear-gradient(180deg, #F4A060 0%, #E06828 30%, #C85010 60%, #8B3008 85%, #A04020 100%);
+    padding: 14px 32px;
+    border-radius: 4px;
+    border: 1px solid rgba(232,138,26,0.3);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 4px 20px rgba(200,80,16,0.4);
+    transition: opacity 150ms;
+  }
+  .cta-btn:hover { opacity: 0.88; }
+
+  /* Value props */
+  .value-section {
+    padding: 80px 0 100px;
+    background-color: var(--color-surface);
+  }
+  .value-header { margin-bottom: 56px; }
+  .value-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(40px, 5vw, 64px);
+    line-height: 0.92;
+    color: var(--color-chrome);
+  }
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+  }
+  .card {
+    background-color: var(--color-bg);
+    border: 1px solid rgba(168,189,208,0.08);
+    border-left: 3px solid var(--color-accent);
+    padding: 40px;
+  }
+  .card-number {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 0.65rem;
+    color: rgba(200,80,16,0.5);
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .card-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.5rem;
+    color: var(--color-chrome);
+    margin-bottom: 14px;
+    line-height: 1.1;
+    letter-spacing: 0.04em;
+  }
+  .card-body {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13.5px;
+    color: rgba(168,189,208,0.75);
+    line-height: 1.7;
+  }
+
+  /* CTA section */
+  .cta-section {
+    padding: 80px 0;
+    background-color: var(--color-bg);
+    border-top: 1px solid rgba(168,189,208,0.08);
+  }
+  .cta-inner {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 0 24px;
+    text-align: center;
+  }
+  .cta-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(40px, 6vw, 68px);
+    color: var(--color-chrome);
+    line-height: 0.92;
+    margin-bottom: 36px;
+  }
+  .cta-body {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 17px;
+    color: var(--color-silver);
+    line-height: 1.75;
+    margin-bottom: 32px;
+  }
+</style>
