@@ -1,0 +1,35 @@
+# Build output
+dist/
+.astro/
+
+# Dependencies
+node_modules/
+
+# Vercel
+.vercel/
+
+# Binary assets — not relevant to Supabase/code work
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+*.mp4
+*.mov
+*.svg
+*.ico
+*.woff
+*.woff2
+*.ttf
+*.otf
+*.eot
+
+# Loose note/planning files at repo root
+background.md
+claude-overhaul.md
+NIL_CALCULATOR_STRATEGY.md
+
+# Env files (secrets)
+.env
+.env.local
+.env.production
