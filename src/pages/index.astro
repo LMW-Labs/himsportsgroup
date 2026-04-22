@@ -82,25 +82,44 @@ const ogImage = '/logo.png'
         flex-direction: column;
         align-items: center;
         text-align: center;
-        gap: 12px;
+        gap: 16px;
         padding: 0 24px;
       }
 
-      .eyebrow {
-        font-family: 'Rajdhani', sans-serif;
-        font-weight: 600;
-        font-size: clamp(0.65rem, 1.5vw, 0.8rem);
-        letter-spacing: 0.4em;
-        color: rgba(168, 189, 208, 0.5);
+      .headline {
+        font-family: 'Bebas Neue', sans-serif;
+        font-size: clamp(4rem, 14vw, 11rem);
+        line-height: 0.9;
+        letter-spacing: 0.06em;
         text-transform: uppercase;
+        /* Chrome/metallic gradient with blue tones */
+        background: linear-gradient(
+          180deg,
+          #FFFFFF 0%,
+          #EAF4FF 8%,
+          #C4DCEE 20%,
+          #82AACC 35%,
+          #4A7898 50%,
+          #285878 62%,
+          #4A7898 75%,
+          #90B8D4 88%,
+          #C8E0F4 100%
+        );
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        /* Orange glow behind letters */
+        filter: drop-shadow(0 0 32px rgba(200, 80, 16, 0.75))
+                drop-shadow(0 0 64px rgba(200, 80, 16, 0.4))
+                drop-shadow(0 2px 4px rgba(0, 0, 0, 0.9));
       }
 
       .tagline {
         font-family: 'Rajdhani', sans-serif;
         font-weight: 600;
-        font-size: clamp(0.7rem, 1.8vw, 0.9rem);
-        letter-spacing: 0.25em;
-        color: rgba(200, 80, 16, 0.8);
+        font-size: clamp(0.75rem, 2vw, 1rem);
+        letter-spacing: 0.35em;
+        color: rgba(168, 189, 208, 0.65);
         text-transform: uppercase;
       }
     </style>
@@ -113,7 +132,7 @@ const ogImage = '/logo.png'
 
     <!-- Foreground text -->
     <div class="content">
-      <p class="eyebrow">Coming Soon</p>
+      <h1 class="headline">Coming Soon</h1>
       <p class="tagline">Your Name. Your Brand. Your Future.</p>
     </div>
   </body>
