@@ -1,0 +1,368 @@
+---
+import PublicLayout from '../../layouts/PublicLayout.astro'
+
+const pillars = [
+  { number: '01', title: 'Market Analytics', desc: 'We analyze your sport, position, school, and social presence to calculate your true market value — then we negotiate to it.' },
+  { number: '02', title: 'NCAA Compliance', desc: 'Every deal we structure is reviewed against current NIL regulations. We protect your eligibility at every stage.' },
+  { number: '03', title: 'Brand Matching', desc: 'We match athletes with brands that align with your identity and audience — deals that feel authentic because they are.' },
+  { number: '04', title: 'Deal Lifecycle', desc: 'From first outreach through contract execution to post-deal reporting, we manage the entire deal so you can focus on competing.' },
+]
+
+const stats = [
+  { value: '$12M+', label: 'NIL Value Secured' },
+  { value: '47+', label: 'Athletes Represented' },
+  { value: '28+', label: 'Brand Deals Closed' },
+  { value: '100%', label: 'Compliance Record' },
+]
+
+const faqs = [
+  {
+    q: 'What is NIL and who is eligible?',
+    a: "NIL stands for Name, Image, and Likeness. Since July 2021, the NCAA allows college athletes to earn compensation from their NIL — through endorsements, autographs, social media, and more. Any current college athlete at an NCAA institution is eligible, provided deals comply with their school's policies.",
+  },
+  {
+    q: 'Do I need an agent to pursue NIL deals?',
+    a: "You don't need an agent, but having professional representation dramatically increases both the quality and value of the deals you can access. We handle outreach, negotiation, contract review, and compliance — freeing you to focus on your sport.",
+  },
+  {
+    q: 'Will a NIL deal affect my athletic scholarship?',
+    a: 'No. NCAA rules explicitly prohibit schools from reducing or revoking athletic scholarships because an athlete has pursued NIL activities. However, individual school policies vary, which is why our compliance review is part of every deal we structure.',
+  },
+  {
+    q: 'How does Hyche International Management Sports Group find brands for my NIL deals?',
+    a: 'We maintain active relationships with brands across consumer goods, apparel, technology, food and beverage, and financial services. We also run proactive outreach campaigns targeting brands whose audience demographics match each athlete we represent.',
+  },
+  {
+    q: 'What sports do you represent?',
+    a: "We represent athletes across basketball, football, soccer, track and field, swimming, and emerging sports. If you're a high-performing athlete building a brand, we want to talk regardless of sport.",
+  },
+  {
+    q: 'How much do Hyche International Management Sports Group NIL deals typically pay?',
+    a: "Deal sizes vary widely based on an athlete's sport, social following, school market, and brand alignment. Our roster includes deals ranging from $5,000 to six-figure annual agreements. We'll give you an honest assessment of your market value on our first call.",
+  },
+]
+---
+
+<PublicLayout
+  title="NIL Representation | Hyche International Management Sports Group"
+  description="Expert NIL deal negotiation for college athletes. Compliance-first, athlete-first. Learn how Hyche International Management Sports Group secures and structures NIL deals."
+>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-grad" aria-hidden="true"></div>
+    <div class="container reveal">
+      <p class="eyebrow">NIL PRACTICE</p>
+      <h1 class="hero-title">
+        YOUR NAME.<br/>
+        YOUR IMAGE.<br/>
+        <span class="blue">YOUR DEAL.</span>
+      </h1>
+      <p class="hero-body">
+        College athletes have earned the right to capitalize on their brand.
+        Hyche International Management Sports Group ensures you capture your full market value — compliantly,
+        strategically, and with deals that build long-term equity.
+      </p>
+      <a href="/contact" class="btn-blue">Get NIL Representation →</a>
+    </div>
+  </section>
+
+  <!-- What is NIL -->
+  <section class="what-section">
+    <div class="container">
+      <div class="what-grid">
+        <div class="reveal">
+          <p class="eyebrow">THE BASICS</p>
+          <h2 class="what-title">WHAT IS NIL?</h2>
+          <div class="what-body">
+            <p>NIL — Name, Image, and Likeness — refers to the rights athletes hold over their own identity. Since the NCAA landmark rule change in July 2021, college athletes can now monetize these rights through endorsement deals, social media sponsorships, autograph signings, merchandise, and more.</p>
+            <p>For the first time, college athletes can be compensated for the brand equity they've built through years of competition and public visibility. The market has grown from zero to billions of dollars in just a few years — and it's still in early innings.</p>
+            <p>Hyche International Management Sports Group was ahead of this shift. Our founder advocated for athlete rights before the rule change, and we've been executing compliant, high-value NIL deals since day one.</p>
+          </div>
+        </div>
+        <div class="allows-box reveal">
+          <p class="eyebrow">NIL ALLOWS</p>
+          {[
+            'Brand endorsements and sponsorships',
+            'Social media paid partnerships',
+            'Autograph signings and memorabilia',
+            'Personal appearances and speaking',
+            'Merchandise and licensed products',
+            'Camps, clinics, and instruction',
+          ].map(item => (
+            <div class="allows-row">
+              <span class="allows-dot" aria-hidden="true"></span>
+              <span class="allows-text">{item}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 Pillars -->
+  <section class="pillars-section">
+    <div class="container">
+      <div class="section-header">
+        <p class="eyebrow">HOW WE WORK</p>
+        <h2 class="section-title">OUR APPROACH</h2>
+      </div>
+      <div class="pillars-grid">
+        {pillars.map(p => (
+          <div class="pillar-card reveal">
+            <p class="pillar-num">{p.number}</p>
+            <h3 class="pillar-title">{p.title}</h3>
+            <p class="pillar-desc">{p.desc}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats Bar -->
+  <section class="stats-section">
+    <div class="container">
+      <div class="stats-grid">
+        {stats.map(s => (
+          <div class="stat-cell reveal">
+            <div class="stat-value">{s.value}</div>
+            <div class="stat-label">{s.label}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="faq-section">
+    <div class="container">
+      <div class="section-header">
+        <p class="eyebrow">COMMON QUESTIONS</p>
+        <h2 class="section-title">NIL FAQ</h2>
+      </div>
+      <div class="faq-list">
+        {faqs.map(item => (
+          <details class="faq-item">
+            <summary class="faq-q">
+              <span>{item.q}</span>
+              <span class="faq-icon" aria-hidden="true">+</span>
+            </summary>
+            <p class="faq-a">{item.a}</p>
+          </details>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section">
+    <div class="container">
+      <div class="cta-inner reveal">
+        <p class="eyebrow">KNOW YOUR VALUE</p>
+        <h2 class="cta-title">WHAT IS YOUR NIL VALUE?</h2>
+        <p class="cta-body">
+          Every athlete has a unique market value based on sport, school, social
+          presence, and performance. Talk to our team for a no-obligation NIL
+          valuation and learn what brands would pay to partner with you.
+        </p>
+        <a href="/contact" class="btn-blue">Get Your NIL Valuation →</a>
+      </div>
+    </div>
+  </section>
+
+</PublicLayout>
+
+<style>
+  .hero {
+    padding-top: 160px; padding-bottom: 80px;
+    background-color: var(--color-bg);
+    position: relative; overflow: hidden;
+  }
+  .hero-grad {
+    position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(135deg, rgba(26,114,232,0.08) 0%, transparent 50%, rgba(200,80,16,0.05) 100%);
+  }
+  .container {
+    max-width: 1120px; margin: 0 auto;
+    padding: 0 clamp(24px, 4vw, 96px);
+    position: relative; z-index: 1;
+  }
+  .eyebrow {
+    font-family: 'Rajdhani', sans-serif; font-weight: 700;
+    font-size: 0.72rem; letter-spacing: 0.32em; color: var(--color-accent);
+    text-transform: uppercase; margin-bottom: 24px;
+  }
+  .hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(52px, 9vw, 108px);
+    line-height: 0.92; color: var(--color-chrome);
+    margin-bottom: 32px;
+  }
+  .blue { color: var(--color-brand); }
+  .hero-body {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 19px; color: var(--color-silver);
+    max-width: 600px; line-height: 1.65; margin-bottom: 40px;
+  }
+  .btn-blue {
+    display: inline-block;
+    font-family: 'Rajdhani', sans-serif; font-weight: 700;
+    font-size: 0.88rem; letter-spacing: 0.15em; text-transform: uppercase;
+    text-decoration: none; color: #fff;
+    background-color: var(--color-brand);
+    padding: 14px 40px;
+    transition: opacity 150ms;
+  }
+  .btn-blue:hover { opacity: 0.85; }
+
+  /* What is NIL */
+  .what-section { padding: 80px 0 96px; background-color: var(--color-surface); }
+  .what-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center;
+  }
+  @media (max-width: 768px) { .what-grid { grid-template-columns: 1fr; gap: 40px; } }
+  .what-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(36px, 5vw, 64px); line-height: 0.92;
+    color: var(--color-chrome); margin-bottom: 24px;
+  }
+  .what-body { display: flex; flex-direction: column; gap: 16px; }
+  .what-body p {
+    font-family: 'DM Sans', sans-serif; font-size: 16px;
+    color: var(--color-silver); line-height: 1.75;
+  }
+  .allows-box {
+    background-color: var(--color-bg);
+    border: 1px solid rgba(168,189,208,0.1);
+    padding: 40px;
+  }
+  .allows-row {
+    display: flex; align-items: center; gap: 16px;
+    padding: 14px 0;
+    border-bottom: 1px solid rgba(168,189,208,0.08);
+  }
+  .allows-row:last-child { border-bottom: none; }
+  .allows-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background-color: var(--color-brand); flex-shrink: 0;
+  }
+  .allows-text {
+    font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--color-silver);
+  }
+
+  /* Pillars */
+  .pillars-section { padding: 80px 0 96px; background-color: var(--color-bg); }
+  .section-header { text-align: center; margin-bottom: 64px; }
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(40px, 6vw, 72px); line-height: 0.92;
+    color: var(--color-chrome);
+  }
+  .pillars-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+  }
+  .pillar-card {
+    background-color: var(--color-surface);
+    border: 1px solid rgba(168,189,208,0.1);
+    padding: 32px;
+  }
+  .pillar-num {
+    font-family: 'Rajdhani', sans-serif; font-weight: 700;
+    font-size: 0.65rem; color: rgba(200,80,16,0.5);
+    letter-spacing: 0.3em; text-transform: uppercase; margin-bottom: 16px;
+  }
+  .pillar-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.75rem; color: var(--color-chrome);
+    margin-bottom: 12px; letter-spacing: 0.03em;
+  }
+  .pillar-desc {
+    font-family: 'DM Sans', sans-serif; font-size: 14px;
+    color: rgba(168,189,208,0.7); line-height: 1.7;
+  }
+
+  /* Stats */
+  .stats-section {
+    padding: 0;
+    background: linear-gradient(to right, #0E1220, #0A0C10, #0E1220);
+    border-top: 1px solid rgba(168,189,208,0.1);
+    border-bottom: 1px solid rgba(168,189,208,0.1);
+  }
+  .stats-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 1px; background-color: rgba(168,189,208,0.1);
+    max-width: 1120px; margin: 0 auto;
+  }
+  @media (max-width: 640px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+  .stat-cell {
+    background-color: var(--color-bg);
+    padding: 40px 32px; text-align: center;
+  }
+  .stat-value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(36px, 4vw, 52px);
+    color: var(--color-chrome); line-height: 1; margin-bottom: 8px;
+  }
+  .stat-label {
+    font-family: 'Rajdhani', sans-serif; font-weight: 600;
+    font-size: 0.65rem; color: rgba(168,189,208,0.6);
+    letter-spacing: 0.25em; text-transform: uppercase;
+  }
+
+  /* FAQ */
+  .faq-section { padding: 80px 0 96px; background-color: var(--color-bg); }
+  .faq-list { max-width: 720px; margin: 0 auto; }
+  .faq-item {
+    border-bottom: 1px solid rgba(168,189,208,0.1);
+  }
+  .faq-q {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 24px 0; cursor: pointer; list-style: none;
+    gap: 16px;
+  }
+  .faq-q::-webkit-details-marker { display: none; }
+  .faq-q span:first-child {
+    font-family: 'Rajdhani', sans-serif; font-weight: 600;
+    font-size: 17px; color: var(--color-chrome);
+    transition: color 200ms;
+  }
+  .faq-item[open] .faq-q span:first-child { color: var(--color-brand); }
+  .faq-icon {
+    font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem;
+    color: var(--color-accent); line-height: 1; flex-shrink: 0;
+    transition: transform 300ms;
+  }
+  .faq-item[open] .faq-icon { transform: rotate(45deg); }
+  .faq-a {
+    font-family: 'DM Sans', sans-serif; font-size: 14px;
+    color: rgba(168,189,208,0.8); line-height: 1.75;
+    padding-bottom: 24px;
+  }
+
+  /* CTA */
+  .cta-section { padding: 80px 0; background-color: var(--color-surface); border-top: 1px solid rgba(168,189,208,0.08); }
+  .cta-inner { text-align: center; max-width: 600px; margin: 0 auto; }
+  .cta-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(36px, 6vw, 72px); line-height: 0.92;
+    color: var(--color-chrome); margin-bottom: 24px;
+  }
+  .cta-body {
+    font-family: 'DM Sans', sans-serif; font-size: 17px;
+    color: var(--color-silver); line-height: 1.75; margin-bottom: 40px;
+  }
+
+  /* Reveal */
+  .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease, transform 0.6s ease; }
+  .reveal.visible { opacity: 1; transform: none; }
+</style>
+
+<script>
+  const obs = new IntersectionObserver(
+    entries => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } }),
+    { threshold: 0.08, rootMargin: '-30px' }
+  )
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el))
+</script>

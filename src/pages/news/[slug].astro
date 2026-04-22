@@ -1,0 +1,203 @@
+---
+import PublicLayout from '../../layouts/PublicLayout.astro'
+import { getArticles, getArticleBySlug } from '../../lib/supabase/queries'
+import type { Article } from '../../lib/supabase/types'
+
+export async function getStaticPaths() {
+  let articles: Article[] = []
+  try {
+    articles = await getArticles()
+  } catch {
+    // No articles yet
+  }
+  return articles.map(a => ({ params: { slug: a.slug }, props: { article: a } }))
+}
+
+const { article } = Astro.props as { article: Article }
+
+function formatDate(iso: string | null) {
+  if (!iso) return ''
+  return new Date(iso).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+}
+
+const description = article.excerpt ?? article.title
+---
+
+<PublicLayout
+  title={`${article.title} | Hyche International Management Sports Group`}
+  description={description}
+  ogImage={article.featured_image ?? undefined}
+>
+
+  <!-- Article Header -->
+  <header class="article-header">
+    <div class="header-glow" aria-hidden="true"></div>
+    <div class="header-inner">
+      <nav class="breadcrumb">
+        <a href="/news">News</a>
+        <span>/</span>
+        <span class="bc-current">{article.title}</span>
+      </nav>
+      <h1 class="article-title">{article.title}</h1>
+      {article.excerpt && <p class="article-excerpt">{article.excerpt}</p>}
+      <div class="article-meta">
+        {article.author && <span>{article.author}</span>}
+        {article.published_at && <span class="meta-sep">·</span>}
+        {article.published_at && <time datetime={article.published_at}>{formatDate(article.published_at)}</time>}
+      </div>
+    </div>
+  </header>
+
+  {article.featured_image && (
+    <div class="hero-image-wrap">
+      <img src={article.featured_image} alt={article.title} loading="lazy" />
+    </div>
+  )}
+
+  <!-- Article Body -->
+  <div class="article-layout">
+    <article class="article-body">
+      {article.body ? (
+        <div class="article-content" set:html={article.body} />
+      ) : (
+        <p class="no-body">Article content coming soon.</p>
+      )}
+    </article>
+
+    <aside class="article-sidebar">
+      <div class="share-box">
+        <p class="share-head">Share</p>
+        <div class="share-btns">
+          <a
+            href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(Astro.url.toString())}&text=${encodeURIComponent(article.title)}`}
+            target="_blank" rel="noopener noreferrer"
+            class="share-btn"
+          >
+            X / Twitter
+          </a>
+          <a
+            href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(Astro.url.toString())}`}
+            target="_blank" rel="noopener noreferrer"
+            class="share-btn"
+          >
+            LinkedIn
+          </a>
+        </div>
+      </div>
+      <div class="back-box">
+        <a href="/news" class="back-link">← All Articles</a>
+      </div>
+    </aside>
+  </div>
+
+</PublicLayout>
+
+<style>
+  .article-header {
+    background-color: var(--color-bg);
+    padding: 120px clamp(24px, 4vw, 96px) 64px;
+    position: relative; overflow: hidden;
+  }
+  .header-glow {
+    position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(ellipse 60% 50% at 50% 0%, rgba(26,114,232,0.08) 0%, transparent 70%);
+  }
+  .header-inner { max-width: 800px; margin: 0 auto; position: relative; z-index: 1; }
+  .breadcrumb {
+    display: flex; align-items: center; gap: 8px;
+    font-family: 'Rajdhani', sans-serif; font-weight: 700;
+    font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+  .breadcrumb a { color: rgba(168,189,208,0.5); text-decoration: none; transition: color 200ms; }
+  .breadcrumb a:hover { color: var(--color-silver); }
+  .breadcrumb span { color: rgba(168,189,208,0.3); }
+  .bc-current { color: var(--color-chrome); }
+  .article-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(40px, 6vw, 80px); line-height: 0.92; letter-spacing: 0.02em;
+    color: var(--color-chrome); margin-bottom: 24px;
+  }
+  .article-excerpt {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 19px; color: var(--color-silver); line-height: 1.65;
+    margin-bottom: 24px;
+  }
+  .article-meta {
+    display: flex; align-items: center; gap: 8px;
+    font-family: 'Rajdhani', sans-serif; font-weight: 600;
+    font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: rgba(168,189,208,0.5);
+  }
+  .meta-sep { opacity: 0.4; }
+
+  .hero-image-wrap {
+    max-width: 900px; margin: 0 auto; padding: 0 clamp(24px, 4vw, 48px);
+  }
+  .hero-image-wrap img { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; }
+
+  /* Layout */
+  .article-layout {
+    display: grid; grid-template-columns: 1fr 280px; gap: 64px;
+    max-width: 1120px; margin: 0 auto;
+    padding: 64px clamp(24px, 4vw, 64px) 96px;
+  }
+  @media (max-width: 900px) { .article-layout { grid-template-columns: 1fr; } }
+
+  /* Body */
+  .article-body { min-width: 0; }
+  .article-content {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 17px; color: var(--color-silver); line-height: 1.85;
+  }
+  .article-content :global(h2),
+  .article-content :global(h3) {
+    font-family: 'Bebas Neue', sans-serif;
+    color: var(--color-chrome); letter-spacing: 0.03em;
+    margin-top: 48px; margin-bottom: 16px;
+  }
+  .article-content :global(h2) { font-size: clamp(28px, 3vw, 44px); }
+  .article-content :global(h3) { font-size: clamp(22px, 2.5vw, 34px); }
+  .article-content :global(p) { margin-bottom: 24px; }
+  .article-content :global(a) { color: var(--color-brand); text-decoration: underline; }
+  .article-content :global(ul), .article-content :global(ol) { padding-left: 24px; margin-bottom: 24px; }
+  .article-content :global(li) { margin-bottom: 8px; }
+  .article-content :global(blockquote) {
+    border-left: 3px solid var(--color-accent);
+    padding-left: 24px; margin: 32px 0;
+    color: rgba(168,189,208,0.8); font-style: italic;
+  }
+  .no-body { font-family: 'DM Sans', sans-serif; font-size: 16px; color: rgba(168,189,208,0.5); }
+
+  /* Sidebar */
+  .article-sidebar { position: sticky; top: 100px; align-self: start; }
+  .share-box {
+    background-color: var(--color-surface);
+    border: 1px solid rgba(168,189,208,0.08);
+    padding: 24px; margin-bottom: 20px;
+  }
+  .share-head {
+    font-family: 'Rajdhani', sans-serif; font-weight: 700;
+    font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase;
+    color: rgba(168,189,208,0.5); margin-bottom: 16px;
+  }
+  .share-btns { display: flex; flex-direction: column; gap: 8px; }
+  .share-btn {
+    display: block; text-align: center;
+    font-family: 'Rajdhani', sans-serif; font-weight: 700;
+    font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase;
+    text-decoration: none; color: var(--color-silver);
+    border: 1px solid rgba(168,189,208,0.2);
+    padding: 10px;
+    transition: border-color 150ms, color 150ms;
+  }
+  .share-btn:hover { border-color: rgba(168,189,208,0.5); color: var(--color-chrome); }
+  .back-box { margin-top: 8px; }
+  .back-link {
+    font-family: 'Rajdhani', sans-serif; font-weight: 700;
+    font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: rgba(168,189,208,0.5); text-decoration: none;
+    transition: color 150ms;
+  }
+  .back-link:hover { color: var(--color-chrome); }
+</style>

@@ -1,0 +1,228 @@
+---
+import PublicLayout from '../../layouts/PublicLayout.astro'
+import { getArticles } from '../../lib/supabase/queries'
+import type { Article } from '../../lib/supabase/types'
+
+let articles: Article[] = []
+try {
+  articles = await getArticles()
+} catch {
+  // No articles yet or Supabase unreachable at build time
+}
+
+const featured = articles[0] ?? null
+const rest = articles.slice(1)
+
+function formatDate(iso: string | null) {
+  if (!iso) return ''
+  return new Date(iso).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+}
+---
+
+<PublicLayout
+  title="News & Insights — Hyche International Management Sports Group"
+  description="The latest NIL news, athlete updates, industry insights, and press releases from Hyche International Management Sports Group."
+>
+
+  <!-- Page Hero -->
+  <section class="news-hero">
+    <div class="hero-grid" aria-hidden="true"></div>
+    <div class="hero-glow" aria-hidden="true"></div>
+    <div class="hero-inner">
+      <p class="eyebrow">Hyche International Management Sports Group</p>
+      <h1 class="hero-title">NEWS &amp; INSIGHTS</h1>
+      <p class="hero-sub">NIL updates, athlete milestones, industry analysis, and the moves shaping the future of college sports.</p>
+    </div>
+  </section>
+
+  <div class="content-wrap">
+
+    {featured ? (
+      <!-- Featured Article -->
+      <section class="featured-wrap">
+        <a href={`/news/${featured.slug}`} class="featured-card">
+          {featured.featured_image && (
+            <div class="featured-img">
+              <img src={featured.featured_image} alt={featured.title} loading="lazy" />
+            </div>
+          )}
+          <div class="featured-body">
+            <p class="featured-label">Featured</p>
+            <h2 class="featured-title">{featured.title}</h2>
+            {featured.excerpt && <p class="featured-excerpt">{featured.excerpt}</p>}
+            <div class="article-meta">
+              {featured.author && <span>{featured.author}</span>}
+              {featured.published_at && <span class="meta-sep">·</span>}
+              {featured.published_at && <span>{formatDate(featured.published_at)}</span>}
+            </div>
+            <span class="read-more">Read Article →</span>
+          </div>
+        </a>
+      </section>
+    ) : null}
+
+    {rest.length > 0 ? (
+      <section class="grid-section">
+        <div class="articles-grid">
+          {rest.map(article => (
+            <a href={`/news/${article.slug}`} class="article-card">
+              {article.featured_image && (
+                <div class="card-img">
+                  <img src={article.featured_image} alt={article.title} loading="lazy" />
+                </div>
+              )}
+              <div class="card-body">
+                <h3 class="card-title">{article.title}</h3>
+                {article.excerpt && <p class="card-excerpt">{article.excerpt}</p>}
+                <div class="article-meta">
+                  {article.author && <span>{article.author}</span>}
+                  {article.published_at && <span class="meta-sep">·</span>}
+                  {article.published_at && <span>{formatDate(article.published_at)}</span>}
+                </div>
+              </div>
+            </a>
+          ))}
+        </div>
+      </section>
+    ) : !featured ? (
+      <div class="empty-state">
+        <p class="empty-headline">NO ARTICLES</p>
+        <p class="empty-sub">No articles have been published yet. Check back soon.</p>
+      </div>
+    ) : null}
+
+  </div>
+
+</PublicLayout>
+
+<style>
+  .news-hero {
+    background-color: var(--color-bg);
+    padding-top: 120px; padding-bottom: 80px; min-height: 320px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+    position: relative; overflow: hidden;
+  }
+  .hero-grid {
+    position: absolute; inset: 0; pointer-events: none;
+    background-image:
+      linear-gradient(rgba(26,114,232,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(26,114,232,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+  .hero-glow {
+    position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(ellipse 60% 50% at 50% 0%, rgba(26,114,232,0.12) 0%, transparent 70%);
+  }
+  .hero-inner { position: relative; z-index: 1; padding: 0 24px; }
+  .eyebrow {
+    font-family: 'Rajdhani', sans-serif; font-weight: 700;
+    font-size: 12px; letter-spacing: 0.25em; text-transform: uppercase;
+    color: var(--color-accent); margin-bottom: 12px;
+  }
+  .hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(56px, 8vw, 110px); letter-spacing: 0.04em; line-height: 1;
+    color: var(--color-chrome);
+  }
+  .hero-sub {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px; color: rgba(168,189,208,0.7);
+    margin-top: 16px; max-width: 480px; line-height: 1.6;
+  }
+
+  .content-wrap {
+    max-width: 1120px; margin: 0 auto;
+    padding: 0 clamp(24px, 4vw, 64px) 96px;
+  }
+
+  /* Featured */
+  .featured-wrap { margin-bottom: 48px; }
+  .featured-card {
+    display: flex; flex-direction: row;
+    background-color: var(--color-surface);
+    border: 1px solid rgba(168,189,208,0.06);
+    text-decoration: none;
+    transition: border-color 200ms;
+    overflow: hidden;
+  }
+  .featured-card:hover { border-color: rgba(168,189,208,0.2); }
+  @media (max-width: 700px) { .featured-card { flex-direction: column; } }
+  .featured-img {
+    flex-shrink: 0; width: 55%;
+  }
+  @media (max-width: 700px) { .featured-img { width: 100%; } }
+  .featured-img img {
+    width: 100%; height: 100%; min-height: 280px;
+    object-fit: cover; display: block;
+  }
+  .featured-body {
+    flex: 1; padding: 40px; display: flex; flex-direction: column; justify-content: center; gap: 16px;
+  }
+  .featured-label {
+    font-family: 'Rajdhani', sans-serif; font-weight: 700;
+    font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase;
+    color: var(--color-accent);
+  }
+  .featured-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(28px, 3vw, 44px); letter-spacing: 0.02em; line-height: 1.05;
+    color: var(--color-chrome);
+  }
+  .featured-excerpt {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px; color: var(--color-silver); line-height: 1.65;
+  }
+  .article-meta {
+    display: flex; align-items: center; gap: 6px;
+    font-family: 'Rajdhani', sans-serif; font-weight: 600;
+    font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: rgba(168,189,208,0.5);
+  }
+  .meta-sep { opacity: 0.4; }
+  .read-more {
+    font-family: 'Rajdhani', sans-serif; font-weight: 700;
+    font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--color-brand);
+    transition: color 150ms;
+  }
+  .featured-card:hover .read-more { color: var(--color-chrome); }
+
+  /* Grid */
+  .grid-section { margin-top: 16px; }
+  .articles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+  }
+  .article-card {
+    display: block;
+    background-color: var(--color-surface);
+    border: 1px solid rgba(168,189,208,0.06);
+    text-decoration: none; overflow: hidden;
+    transition: border-color 200ms, transform 200ms;
+  }
+  .article-card:hover { border-color: rgba(168,189,208,0.2); transform: translateY(-2px); }
+  .card-img { aspect-ratio: 16/9; overflow: hidden; }
+  .card-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .card-body { padding: 24px 20px; }
+  .card-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.5rem; letter-spacing: 0.02em; line-height: 1.1;
+    color: var(--color-chrome); margin-bottom: 10px;
+  }
+  .card-excerpt {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px; color: rgba(168,189,208,0.75); line-height: 1.6;
+    margin-bottom: 16px;
+    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+  }
+
+  /* Empty */
+  .empty-state { text-align: center; padding: 96px 24px; }
+  .empty-headline {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(48px, 6vw, 80px); letter-spacing: 0.04em;
+    color: rgba(168,189,208,0.15); margin-bottom: 16px;
+  }
+  .empty-sub { font-family: 'DM Sans', sans-serif; font-size: 15px; color: rgba(168,189,208,0.4); }
+</style>

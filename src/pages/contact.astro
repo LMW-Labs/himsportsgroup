@@ -1,0 +1,267 @@
+---
+import PublicLayout from '../layouts/PublicLayout.astro'
+import ContactForm from '../components/interactive/ContactForm'
+
+// Read ?type= from query string to pre-select tab
+const url = new URL(Astro.request.url)
+const initialTab = (url.searchParams.get('type') ?? 'athlete') as 'athlete' | 'brand' | 'media'
+const validTabs = ['athlete', 'brand', 'media']
+const safeTab = validTabs.includes(initialTab) ? initialTab : 'athlete'
+---
+
+<PublicLayout
+  title="Contact | Hyche International Management Sports Group"
+  description="Get in touch with Hyche International Management Sports Group — athlete representation inquiries, brand partnerships, and media requests."
+>
+
+  <!-- Hero -->
+  <section class="contact-hero">
+    <h1 class="hero-title">LET'S CONNECT</h1>
+    <p class="hero-sub">Three ways to reach us. Every inquiry gets a response within 48 hours.</p>
+  </section>
+
+  <!-- Two-column body -->
+  <section class="contact-body">
+    <div class="contact-layout">
+
+      <!-- Left: direct contact + form -->
+      <div class="contact-left">
+
+        <!-- Direct contact card -->
+        <div class="direct-card">
+          <p class="eyebrow">Prefer to reach out directly?</p>
+          <h2 class="direct-title">WE ANSWER OUR OWN PHONE.</h2>
+          <p class="direct-body">
+            Hyche International Management is boutique by design. If you'd rather skip the form,
+            reach out directly — you'll hear back within 48 hours.
+          </p>
+          <div class="direct-links">
+            <a href="mailto:chris@hycheims.com" class="direct-link">
+              <span class="dl-icon">📧</span>
+              <div>
+                <div class="dl-label">Email</div>
+                <div class="dl-value">chris@hycheims.com</div>
+              </div>
+            </a>
+            <a href="tel:+12120000000" class="direct-link">
+              <span class="dl-icon">📱</span>
+              <div>
+                <div class="dl-label">Phone</div>
+                <div class="dl-value">(XXX) XXX-XXXX</div>
+              </div>
+            </a>
+            <a href="https://instagram.com/chrishyche" target="_blank" rel="noopener noreferrer" class="direct-link">
+              <span class="dl-icon">📸</span>
+              <div>
+                <div class="dl-label">Instagram</div>
+                <div class="dl-value">@chrishyche</div>
+              </div>
+            </a>
+          </div>
+        </div>
+
+        <!-- Divider -->
+        <div class="or-divider">
+          <div class="or-line"></div>
+          <span class="or-text">Or Send a Message</span>
+          <div class="or-line"></div>
+        </div>
+
+        <!-- Contact Form React island -->
+        <ContactForm client:load initialTab={safeTab} />
+
+      </div>
+
+      <!-- Right: contact info sidebar -->
+      <aside class="contact-right">
+        <div class="info-sticky">
+          <h2 class="info-location">JACKSON, MS<br/>HEADQUARTERS</h2>
+          <p class="info-sub">Based in Jackson, Mississippi · Serving athletes nationwide</p>
+
+          <div class="info-divider"></div>
+
+          <div class="info-field">
+            <p class="info-label">Email</p>
+            <a href="mailto:chris@hycheims.com" class="info-value-link">chris@hycheims.com</a>
+          </div>
+          <div class="info-field">
+            <p class="info-label">Phone</p>
+            <span class="info-value">(XXX) XXX-XXXX</span>
+          </div>
+
+          <div class="guarantee-pill">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="10" stroke="#C85010" stroke-width="2"/>
+              <path d="M12 6v6l4 2" stroke="#C85010" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <span>48-Hour Guarantee</span>
+          </div>
+
+          <p class="info-note">All inquiries are handled personally by our team. No automated responses.</p>
+
+          <div class="info-stats">
+            {[
+              { label: 'Athletes Represented', value: '50+' },
+              { label: 'Brand Partnerships', value: '120+' },
+              { label: 'NIL Deals Secured', value: '$2M+' },
+            ].map(s => (
+              <div class="stat-row">
+                <div class="stat-value">{s.value}</div>
+                <div class="stat-label">{s.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </aside>
+
+    </div>
+  </section>
+
+</PublicLayout>
+
+<style>
+  /* ── Hero ── */
+  .contact-hero {
+    background-color: var(--color-bg);
+    padding: 128px 24px 80px;
+    text-align: center;
+  }
+  .hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(3.5rem, 9vw, 7rem);
+    letter-spacing: 0.08em; line-height: 1;
+    color: var(--color-chrome); margin: 0;
+  }
+  .hero-sub {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 17px; color: var(--color-silver);
+    margin-top: 20px; opacity: 0.8;
+  }
+
+  /* ── Body ── */
+  .contact-body {
+    background-color: var(--color-bg);
+    padding: 0 0 96px;
+  }
+  .contact-layout {
+    max-width: 1200px; margin: 0 auto;
+    padding: 0 clamp(24px, 3vw, 48px);
+    display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    gap: 64px;
+  }
+  @media (max-width: 900px) { .contact-layout { grid-template-columns: 1fr; } .contact-right { display: none; } }
+
+  /* Direct card */
+  .direct-card {
+    background: rgba(14,18,32,0.6);
+    border: 1px solid rgba(168,189,208,0.12);
+    padding: 32px; margin-bottom: 32px;
+    border-radius: 4px;
+  }
+  .eyebrow {
+    font-family: 'Rajdhani', sans-serif; font-weight: 700;
+    font-size: 0.72rem; letter-spacing: 0.32em; text-transform: uppercase;
+    color: var(--color-accent); margin-bottom: 16px;
+  }
+  .direct-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(28px, 3vw, 42px); letter-spacing: 0.02em;
+    color: var(--color-chrome); margin-bottom: 20px;
+  }
+  .direct-body {
+    font-family: 'DM Sans', sans-serif; font-size: 15px;
+    color: var(--color-silver); line-height: 1.75; margin-bottom: 28px;
+  }
+  .direct-links {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+  }
+  .direct-link {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 16px;
+    background: rgba(10,12,16,0.6);
+    border: 1px solid rgba(168,189,208,0.15);
+    text-decoration: none; border-radius: 2px;
+    transition: border-color 200ms;
+  }
+  .direct-link:hover { border-color: var(--color-brand); }
+  .dl-icon { font-size: 18px; }
+  .dl-label {
+    font-family: 'Rajdhani', sans-serif; font-weight: 700;
+    font-size: 0.65rem; letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--color-silver); margin-bottom: 2px;
+  }
+  .dl-value {
+    font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--color-chrome);
+  }
+
+  /* Or divider */
+  .or-divider {
+    display: flex; align-items: center; gap: 16px;
+    padding: 20px 0; margin-bottom: 8px;
+  }
+  .or-line {
+    flex: 1; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(168,189,208,0.2), transparent);
+  }
+  .or-text {
+    font-family: 'Rajdhani', sans-serif; font-weight: 600;
+    font-size: 0.68rem; letter-spacing: 0.28em; text-transform: uppercase;
+    color: var(--color-silver); opacity: 0.6; white-space: nowrap;
+  }
+
+  /* ── Sidebar ── */
+  .info-sticky { position: sticky; top: 96px; padding-left: 32px; }
+  @media (max-width: 900px) { .info-sticky { padding-left: 0; } }
+  .info-location {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2rem, 4vw, 3rem); letter-spacing: 0.08em; line-height: 1.1;
+    color: var(--color-chrome); margin-bottom: 8px;
+  }
+  .info-sub {
+    font-family: 'DM Sans', sans-serif;
+    color: rgba(168,189,208,0.5); font-size: 0.85rem; line-height: 1.5; margin-bottom: 16px;
+  }
+  .info-divider { height: 1px; background: rgba(168,189,208,0.15); margin-bottom: 24px; }
+  .info-field { margin-bottom: 16px; }
+  .info-label {
+    font-family: 'Rajdhani', sans-serif; font-weight: 600;
+    font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase;
+    color: rgba(168,189,208,0.5); margin-bottom: 4px;
+  }
+  .info-value {
+    font-family: 'Rajdhani', sans-serif; font-weight: 600;
+    color: var(--color-silver); font-size: 1rem;
+  }
+  .info-value-link {
+    font-family: 'Rajdhani', sans-serif; font-weight: 600;
+    color: var(--color-silver); font-size: 1rem; text-decoration: none;
+    transition: color 150ms;
+  }
+  .info-value-link:hover { color: var(--color-brand); }
+  .guarantee-pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    border: 1px solid var(--color-accent); border-radius: 100px;
+    padding: 6px 16px; margin-bottom: 16px; margin-top: 8px;
+  }
+  .guarantee-pill span {
+    font-family: 'Rajdhani', sans-serif; font-weight: 700;
+    color: var(--color-accent); font-size: 0.8rem; letter-spacing: 0.06em;
+  }
+  .info-note {
+    font-family: 'DM Sans', sans-serif; color: rgba(168,189,208,0.45);
+    font-size: 0.88rem; line-height: 1.6; margin-bottom: 32px;
+  }
+  .info-stats { padding-top: 24px; border-top: 1px solid rgba(168,189,208,0.1); }
+  .stat-row { margin-bottom: 16px; }
+  .stat-value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem; letter-spacing: 0.05em; color: var(--color-brand);
+  }
+  .stat-label {
+    font-family: 'Rajdhani', sans-serif; font-weight: 600;
+    font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase;
+    color: rgba(168,189,208,0.5);
+  }
+</style>

@@ -1,0 +1,348 @@
+---
+import PublicLayout from '../../layouts/PublicLayout.astro'
+import { getAthletes, getAthleteBySlug } from '../../lib/supabase/queries'
+import type { Athlete } from '../../lib/supabase/types'
+
+export async function getStaticPaths() {
+  let athletes: Athlete[] = []
+  try {
+    athletes = await getAthletes()
+  } catch {
+    // No athletes yet — build with empty set
+  }
+  return athletes.map(a => ({ params: { slug: a.slug }, props: { athlete: a } }))
+}
+
+const { athlete } = Astro.props as { athlete: Athlete }
+
+const STATUS_CONFIG: Record<string, { label: string; bg: string; text: string; border: string }> = {
+  nil_client:   { label: 'NIL Client',   bg: 'rgba(26,114,232,0.2)',  text: '#1A72E8', border: 'rgba(26,114,232,0.4)' },
+  pro_prospect: { label: 'Pro Prospect', bg: 'rgba(200,80,16,0.2)',   text: '#C85010', border: 'rgba(200,80,16,0.4)'  },
+  rising_star:  { label: 'Rising Star',  bg: 'rgba(34,197,94,0.2)',   text: '#22c55e', border: 'rgba(34,197,94,0.4)'  },
+  alumni:       { label: 'Alumni',       bg: 'rgba(168,189,208,0.2)', text: '#A8BDD0', border: 'rgba(168,189,208,0.4)'},
+}
+
+const status = athlete.status ? STATUS_CONFIG[athlete.status] : null
+
+const physicals: { label: string; value: string }[] = [
+  // athlete type doesn't currently expose these fields — extend as needed
+].filter(Boolean)
+
+const socials: { href: string; label: string }[] = [
+  athlete.instagram && { href: `https://instagram.com/${athlete.instagram.replace('@', '')}`, label: 'Instagram' },
+  athlete.twitter   && { href: `https://x.com/${athlete.twitter.replace('@', '')}`,         label: 'X / Twitter' },
+  athlete.tiktok    && { href: `https://tiktok.com/@${athlete.tiktok.replace('@', '')}`,    label: 'TikTok' },
+].filter(Boolean) as { href: string; label: string }[]
+
+const description = athlete.bio
+  ? athlete.bio.slice(0, 160)
+  : `${athlete.name} — ${athlete.sport}${athlete.position ? ` / ${athlete.position}` : ''} represented by Hyche International Management Sports Group.`
+---
+
+<PublicLayout
+  title={`${athlete.name} | Hyche International Management Sports Group`}
+  description={description}
+  ogImage={athlete.photo_url ?? undefined}
+>
+
+  <!-- Hero -->
+  <div class="profile-hero" style={athlete.photo_url ? '' : ''}>
+    {athlete.photo_url && (
+      <div class="hero-photo">
+        <img src={athlete.photo_url} alt={athlete.name} />
+      </div>
+    )}
+    <div class="hero-overlay"></div>
+    <div class="hero-inner">
+
+      <!-- Breadcrumb -->
+      <nav class="breadcrumb" aria-label="breadcrumb">
+        <a href="/athletes">Athletes</a>
+        <span>/</span>
+        {athlete.sport && (
+          <>
+            <a href={`/athletes/${athlete.sport.toLowerCase().replace(/ & /g, '-').replace(/ /g, '-')}`}>
+              {athlete.sport}
+            </a>
+            <span>/</span>
+          </>
+        )}
+        <span class="bc-current">{athlete.name}</span>
+      </nav>
+
+      <!-- Sport / position / status badges -->
+      <div class="badge-row">
+        {athlete.sport && (
+          <span class="badge-sport">{athlete.sport}</span>
+        )}
+        {athlete.position && (
+          <span class="badge-position">{athlete.position}</span>
+        )}
+        {status && (
+          <span class="badge-status" style={`background:${status.bg};color:${status.text};border-color:${status.border}`}>
+            {status.label}
+          </span>
+        )}
+      </div>
+
+      <!-- Name -->
+      <h1 class="athlete-name">{athlete.name.toUpperCase()}</h1>
+
+      {athlete.school && (
+        <p class="athlete-school">
+          {athlete.school}
+          {athlete.nil_value_display && (
+            <span class="nil-value">{athlete.nil_value_display}</span>
+          )}
+        </p>
+      )}
+    </div>
+  </div>
+
+  <!-- Body -->
+  <div class="profile-body">
+    <div class="profile-layout">
+
+      <!-- Left (2/3) -->
+      <div class="profile-main">
+
+        {athlete.bio && (
+          <section class="bio-section">
+            <h2 class="section-head">ABOUT</h2>
+            <div class="bio-text">
+              {athlete.bio.split('\n').filter(Boolean).map(para => (
+                <p>{para}</p>
+              ))}
+            </div>
+          </section>
+        )}
+
+      </div>
+
+      <!-- Right sidebar (1/3) -->
+      <aside class="profile-sidebar">
+
+        {athlete.photo_url && (
+          <div class="sidebar-photo">
+            <img src={athlete.photo_url} alt={athlete.name} />
+          </div>
+        )}
+
+        {physicals.length > 0 && (
+          <div class="info-box">
+            <div class="info-box-head">Athlete Info</div>
+            {physicals.map(({ label, value }) => (
+              <div class="info-row">
+                <span class="info-label">{label}</span>
+                <span class="info-value">{value}</span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {socials.length > 0 && (
+          <div class="socials-block">
+            <h3 class="socials-head">Follow {athlete.name.split(' ')[0]}</h3>
+            <div class="socials-list">
+              {socials.map(({ href, label }) => (
+                <a href={href} target="_blank" rel="noopener noreferrer" class="social-link">
+                  {label}
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <!-- CTA box -->
+        <div class="cta-box">
+          <div class="cta-top-line"></div>
+          <p class="cta-eyebrow">Interested in this level of representation?</p>
+          <p class="cta-body">We work with a select group of athletes. Reach out to learn how we can build your career.</p>
+          <a href="/contact" class="cta-btn">Get in Touch →</a>
+        </div>
+
+      </aside>
+    </div>
+  </div>
+
+</PublicLayout>
+
+<style>
+  /* ── Hero ── */
+  .profile-hero {
+    position: relative; min-height: 72vh;
+    background-color: var(--color-bg);
+    display: flex; flex-direction: column; justify-content: flex-end;
+    overflow: hidden;
+  }
+  .hero-photo {
+    position: absolute; inset: 0;
+  }
+  .hero-photo img {
+    width: 100%; height: 100%;
+    object-fit: cover; object-position: top;
+    filter: brightness(0.35) saturate(0.8);
+  }
+  .hero-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, #0A0C10 20%, rgba(10,12,16,0.7) 55%, rgba(10,12,16,0.3) 100%);
+  }
+  .hero-inner {
+    position: relative; z-index: 1;
+    max-width: 1400px; width: 100%;
+    margin: 0 auto;
+    padding: 120px clamp(24px, 4vw, 96px) 48px;
+  }
+  .breadcrumb {
+    display: flex; align-items: center; gap: 8px;
+    font-family: 'Rajdhani', sans-serif; font-weight: 700;
+    font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+    margin-bottom: 32px;
+  }
+  .breadcrumb a {
+    color: rgba(168,189,208,0.5); text-decoration: none;
+    transition: color 200ms;
+  }
+  .breadcrumb a:hover { color: var(--color-silver); }
+  .breadcrumb span { color: rgba(168,189,208,0.3); }
+  .bc-current { color: var(--color-chrome); }
+  .badge-row {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 12px;
+    margin-bottom: 16px;
+  }
+  .badge-sport {
+    font-family: 'Rajdhani', sans-serif; font-weight: 600;
+    font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+    padding: 4px 12px;
+    background: rgba(26,114,232,0.25); color: #1A72E8; border: 1px solid rgba(26,114,232,0.4);
+  }
+  .badge-position {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 14px; color: rgba(168,189,208,0.7); letter-spacing: 0.06em;
+  }
+  .badge-status {
+    font-family: 'Rajdhani', sans-serif; font-weight: 600;
+    font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 4px 10px; border: 1px solid;
+  }
+  .athlete-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(56px, 9vw, 130px);
+    line-height: 0.88; letter-spacing: 0.01em;
+    color: var(--color-chrome);
+  }
+  .athlete-school {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px; color: var(--color-silver);
+    margin-top: 16px;
+  }
+  .nil-value {
+    margin-left: 16px;
+    font-family: 'Rajdhani', sans-serif; font-weight: 700;
+    color: var(--color-accent);
+  }
+
+  /* ── Body ── */
+  .profile-body {
+    background-color: var(--color-bg);
+    padding: 64px clamp(24px, 4vw, 96px);
+  }
+  .profile-layout {
+    display: grid; grid-template-columns: 1fr 320px; gap: 64px;
+    max-width: 1400px; margin: 0 auto;
+  }
+  @media (max-width: 900px) { .profile-layout { grid-template-columns: 1fr; } }
+  .section-head {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(24px, 3vw, 40px); letter-spacing: 0.02em;
+    color: var(--color-chrome); margin-bottom: 24px;
+  }
+  .bio-section { margin-bottom: 48px; }
+  .bio-text { display: flex; flex-direction: column; gap: 16px; }
+  .bio-text p {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px; color: var(--color-silver); line-height: 1.8;
+  }
+
+  /* Sidebar */
+  .sidebar-photo {
+    overflow: hidden; border: 1px solid rgba(168,189,208,0.1);
+    margin-bottom: 32px;
+  }
+  .sidebar-photo img { width: 100%; aspect-ratio: 3/4; object-fit: cover; object-position: top; }
+  .info-box {
+    border: 1px solid rgba(168,189,208,0.1);
+    background-color: var(--color-surface);
+    overflow: hidden; margin-bottom: 32px;
+  }
+  .info-box-head {
+    font-family: 'Rajdhani', sans-serif; font-weight: 700;
+    font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: rgba(168,189,208,0.6);
+    padding: 12px 20px;
+    border-bottom: 1px solid rgba(168,189,208,0.1);
+  }
+  .info-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 20px;
+    border-bottom: 1px solid rgba(168,189,208,0.06);
+  }
+  .info-row:last-child { border-bottom: none; }
+  .info-label {
+    font-family: 'Rajdhani', sans-serif; font-size: 10px;
+    text-transform: uppercase; letter-spacing: 0.15em; color: rgba(168,189,208,0.5);
+  }
+  .info-value {
+    font-family: 'Rajdhani', sans-serif; font-weight: 600;
+    font-size: 14px; color: var(--color-chrome);
+  }
+  .socials-block { margin-bottom: 32px; }
+  .socials-head {
+    font-family: 'Rajdhani', sans-serif; font-weight: 700;
+    font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase;
+    color: rgba(168,189,208,0.6); margin-bottom: 16px;
+  }
+  .socials-list { display: flex; flex-wrap: wrap; gap: 10px; }
+  .social-link {
+    font-family: 'Rajdhani', sans-serif; font-weight: 600;
+    font-size: 12px; letter-spacing: 0.08em;
+    color: rgba(168,189,208,0.6); text-decoration: none;
+    border: 1px solid rgba(168,189,208,0.15);
+    padding: 8px 14px;
+    background: rgba(14,18,32,0.8);
+    transition: color 200ms, border-color 200ms;
+  }
+  .social-link:hover { color: var(--color-chrome); border-color: rgba(168,189,208,0.4); }
+
+  /* CTA box */
+  .cta-box {
+    position: relative; overflow: hidden;
+    background: rgba(200,80,16,0.06);
+    border: 1px solid rgba(200,80,16,0.2);
+    padding: 24px;
+  }
+  .cta-top-line {
+    position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background-color: #C85010;
+  }
+  .cta-eyebrow {
+    font-family: 'Rajdhani', sans-serif; font-weight: 700;
+    font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--color-accent); margin-bottom: 12px;
+  }
+  .cta-body {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px; color: rgba(168,189,208,0.8);
+    line-height: 1.65; margin-bottom: 20px;
+  }
+  .cta-btn {
+    display: block; text-align: center;
+    font-family: 'Rajdhani', sans-serif; font-weight: 700;
+    font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase;
+    text-decoration: none; color: #fff;
+    background-color: #C85010;
+    padding: 12px 20px;
+    transition: opacity 150ms;
+  }
+  .cta-btn:hover { opacity: 0.9; }
+</style>
