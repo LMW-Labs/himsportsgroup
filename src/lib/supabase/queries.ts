@@ -68,3 +68,14 @@ export async function getArticleBySlug(slug: string): Promise<Article | null> {
   }
   return data
 }
+
+export async function getAthletesBySport(sport: string): Promise<Athlete[]> {
+  const { data, error } = await supabase
+    .from('athletes')
+    .select('*')
+    .eq('published', true)
+    .ilike('sport', `%${sport}%`)
+    .order('name')
+  if (error) throw new Error(`getAthletesBySport: ${error.message}`)
+  return data
+}
