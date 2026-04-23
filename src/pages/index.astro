@@ -1,23 +1,210 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro'
+import PublicLayout from '../layouts/PublicLayout.astro'
+import StatsBar from '../components/interactive/StatsBar'
 ---
 
-<BaseLayout
-  title="Hyche International Management Sports Group"
-  description="NIL deal negotiation, contract representation, and brand architecture for the next generation of athletes. Based in Jackson, MS."
+<PublicLayout
+  title="Hyche International Management Sports Group | NIL & Athlete Representation"
+  description="NIL deal negotiation, contract representation, and brand architecture for the next generation of athletes. Based in Jackson, MS — built by a former Harlem Globetrotter."
 >
 
+  <!-- ── Hero ───────────────────────────────────────────────────────────────── -->
+  <section class="hero">
+    <div class="hero-grid" aria-hidden="true"></div>
+    <div class="hero-glow" aria-hidden="true"></div>
+
+    <div class="hero-watermark" aria-hidden="true">
+      <img src="/logo.png" alt="" />
+    </div>
+
+    <div class="hero-inner">
+      <div class="hero-type">
+        <span class="hero-solid chrome-text">HYCHE</span>
+        <span class="hero-outline">INTERNATIONAL</span>
+      </div>
+      <p class="hero-tagline">Your Name. Your Brand. Your Future.</p>
+      <a href="/contact" class="btn-copper">Apply for Representation →</a>
+    </div>
+  </section>
+
+  <!-- ── Stats Bar (React island) ──────────────────────────────────────────── -->
+  <StatsBar client:visible />
+
+  <!-- ── Services / Pillars ────────────────────────────────────────────────── -->
+  <section class="services-section">
+    <div class="container">
+      <div class="services-header reveal">
+        <p class="eyebrow">What We Do</p>
+        <h2 class="chrome-text services-title">WHAT WE DO</h2>
+      </div>
+      <div class="services-grid">
+        <div class="service-card reveal" style="--delay:0s">
+          <div class="card-accent-line" aria-hidden="true"></div>
+          <h3 class="card-title">NIL REPRESENTATION</h3>
+          <p class="card-body">Negotiate NIL deals, collective agreements, and brand partnerships for collegiate athletes. We maximize value without compromising eligibility or reputation.</p>
+        </div>
+        <div class="service-card reveal" style="--delay:0.1s">
+          <div class="card-accent-line" aria-hidden="true"></div>
+          <h3 class="card-title">CONTRACT NEGOTIATION</h3>
+          <p class="card-body">From the first professional offer to multi-year extensions, we protect your interests at every stage of your career.</p>
+        </div>
+        <div class="service-card reveal" style="--delay:0.2s">
+          <div class="card-accent-line" aria-hidden="true"></div>
+          <h3 class="card-title">BRAND ARCHITECTURE</h3>
+          <p class="card-body">Your name is a business. We help you build it — identity, partnerships, media presence, and long-term equity.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── About / Founder Strip ─────────────────────────────────────────────── -->
+  <section class="founder-strip">
+    <div class="container">
+      <div class="founder-grid">
+        <div class="founder-left reveal">
+          <h2 class="chrome-text founder-headline">BUILT BY SOMEONE WHO LIVED IT</h2>
+          <p class="founder-bio">
+            Chris Hyche is a Jackson, Mississippi native and former Harlem Globetrotter who performed across 38 states and 26+ countries under the name "Animal." He founded Hyche International Management Sports Group on a simple belief: the best advocates are the ones who've lived the journey.
+          </p>
+          <p class="founder-bio founder-bio--dim">
+            From NIL to professional contracts, every deal we negotiate is backed by lived experience — not just legal theory.
+          </p>
+          <a href="/about" class="link-arrow">Our Story →</a>
+        </div>
+        <div class="founder-right reveal" style="--delay:0.12s">
+          <div class="founder-creds">
+            <div class="cred-item">
+              <div class="chrome-text cred-number">26+</div>
+              <div class="cred-label">Countries</div>
+            </div>
+            <div class="cred-item">
+              <div class="chrome-text cred-number">38+</div>
+              <div class="cred-label">States</div>
+            </div>
+            <div class="cred-item">
+              <div class="chrome-text cred-number">4</div>
+              <div class="cred-label">Pro Leagues</div>
+            </div>
+            <div class="cred-item">
+              <div class="chrome-text cred-number">2018</div>
+              <div class="cred-label">Joined Globetrotters</div>
+            </div>
+          </div>
+          <div class="founder-quote">
+            <p>"GREAT AGENTS DIDN'T JUST WATCH THE GAME — THEY LIVED IT."</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Sports Coverage ────────────────────────────────────────────────────── -->
+  <section class="sports-section">
+    <div class="container">
+      <div class="sports-header reveal">
+        <p class="eyebrow">Sports We Cover</p>
+        <h2 class="chrome-text sports-title">SPORTS WE COVER</h2>
+      </div>
+      <div class="sports-grid">
+        <a href="/athletes" class="sport-card reveal" style="--delay:0s">
+          <div class="sport-accent" aria-hidden="true"></div>
+          <div class="sport-name">Basketball</div>
+          <p class="sport-body">From high-major college programs to NBA Draft prospects, we navigate NIL deals, endorsements, and professional transition.</p>
+          <span class="sport-link">View Athletes →</span>
+        </a>
+        <a href="/athletes" class="sport-card reveal" style="--delay:0.1s">
+          <div class="sport-accent" aria-hidden="true"></div>
+          <div class="sport-name">Football</div>
+          <p class="sport-body">CFB standouts, NFL Draft prospects, and active professionals. Contracts, NIL, and brand building end to end.</p>
+          <span class="sport-link">View Athletes →</span>
+        </a>
+        <a href="/athletes" class="sport-card reveal" style="--delay:0.2s">
+          <div class="sport-accent" aria-hidden="true"></div>
+          <div class="sport-name">Track &amp; Field</div>
+          <p class="sport-body">Track and field athletes have unique NIL windows and sponsorship opportunities. We specialize in maximizing value before and after collegiate careers.</p>
+          <span class="sport-link">View Athletes →</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Final CTA ─────────────────────────────────────────────────────────── -->
+  <section class="cta-section">
+    <div class="cta-glow" aria-hidden="true"></div>
+    <div class="cta-inner reveal">
+      <h2 class="chrome-text cta-title">READY TO BUILD YOUR FUTURE?</h2>
+      <p class="cta-body">
+        We work with a select group of athletes at every stage of their career. Apply today and we'll respond within 48 hours.
+      </p>
+      <div class="cta-actions">
+        <a href="/contact" class="btn-copper">Apply for Representation</a>
+        <a href="/about" class="btn-ghost">Learn About Us</a>
+      </div>
+    </div>
+  </section>
+
+</PublicLayout>
+
 <style>
-  body {
+  .container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 clamp(24px, 4vw, 96px);
     position: relative;
-    min-height: 100dvh;
-    overflow: hidden;
+    z-index: 1;
+  }
+
+  .eyebrow {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 0.68rem;
+    letter-spacing: 0.32em;
+    color: var(--color-accent);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 0.65s ease, transform 0.65s ease;
+    transition-delay: var(--delay, 0s);
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ── Hero ── */
+  .hero {
+    min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
+    background-color: var(--color-bg);
+    position: relative;
+    overflow: hidden;
+    padding: 120px clamp(24px, 4vw, 96px) 80px;
   }
 
-  .watermark {
+  .hero-grid {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      linear-gradient(rgba(168,189,208,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(168,189,208,0.025) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+
+  .hero-glow {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(ellipse 60% 60% at 50% 50%, rgba(200,80,16,0.07) 0%, transparent 70%);
+  }
+
+  .hero-watermark {
     position: absolute;
     inset: 0;
     display: flex;
@@ -25,68 +212,409 @@ import BaseLayout from '../layouts/BaseLayout.astro'
     justify-content: center;
     pointer-events: none;
     user-select: none;
+    z-index: 0;
   }
-
-  .watermark img {
-    width: clamp(280px, 65vw, 900px);
-    opacity: 0.15;
+  .hero-watermark img {
+    width: clamp(300px, 60vw, 800px);
+    opacity: 0.08;
     mix-blend-mode: screen;
   }
 
-  @media (max-width: 640px) {
-    .watermark img { width: 85vw; }
-  }
-
-  .content {
+  .hero-inner {
     position: relative;
-    z-index: 10;
+    z-index: 1;
+    text-align: center;
     display: flex;
     flex-direction: column;
     align-items: center;
-    text-align: center;
-    gap: 16px;
-    padding: 0 24px;
+    gap: 28px;
+    max-width: 960px;
   }
 
-  .headline {
+  .hero-type {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    line-height: 0.88;
+  }
+
+  .hero-solid {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(4rem, 14vw, 11rem);
-    line-height: 0.9;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    background: linear-gradient(
-      180deg,
-      #FFFFFF 0%, #EAF4FF 8%, #C4DCEE 20%,
-      #82AACC 35%, #4A7898 50%, #285878 62%,
-      #4A7898 75%, #90B8D4 88%, #C8E0F4 100%
-    );
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    filter: drop-shadow(0 0 32px rgba(200,80,16,0.75))
-            drop-shadow(0 0 64px rgba(200,80,16,0.4))
-            drop-shadow(0 2px 4px rgba(0,0,0,0.9));
+    font-size: clamp(100px, 18vw, 220px);
+    letter-spacing: 0.04em;
+    display: block;
   }
 
-  .tagline {
+  .hero-outline {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(100px, 18vw, 220px);
+    letter-spacing: 0.04em;
+    color: transparent;
+    -webkit-text-stroke: 1.5px rgba(168,189,208,0.35);
+    display: block;
+  }
+
+  .hero-tagline {
     font-family: 'Rajdhani', sans-serif;
     font-weight: 600;
-    font-size: clamp(1.125rem, 2.5vw, 1.5rem);
+    font-size: clamp(0.85rem, 1.2vw, 1.1rem);
     letter-spacing: 0.35em;
-    color: rgba(168,189,208,0.65);
+    color: var(--color-silver);
     text-transform: uppercase;
+  }
+
+  /* ── Buttons ── */
+  .btn-copper {
+    display: inline-block;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 0.88rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: #fff;
+    background: linear-gradient(135deg, #C85010, #E06828);
+    padding: 15px 36px;
+    border-radius: 4px;
+    transition: opacity 150ms, box-shadow 150ms;
+  }
+  .btn-copper:hover {
+    opacity: 0.9;
+    box-shadow: 0 0 32px rgba(200,80,16,0.4);
+  }
+
+  .btn-ghost {
+    display: inline-block;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 0.88rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--color-chrome);
+    border: 1px solid rgba(216,232,244,0.25);
+    padding: 15px 36px;
+    border-radius: 4px;
+    transition: border-color 150ms, color 150ms;
+  }
+  .btn-ghost:hover {
+    border-color: rgba(216,232,244,0.5);
+    color: #fff;
+  }
+
+  .link-arrow {
+    display: inline-block;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 0.88rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--color-accent);
+    transition: color 150ms;
+    margin-top: 8px;
+  }
+  .link-arrow:hover { color: #E06828; }
+
+  /* ── Services ── */
+  .services-section {
+    padding: 100px 0;
+    background-color: var(--color-bg);
+  }
+
+  .services-header {
+    margin-bottom: 56px;
+    text-align: center;
+  }
+
+  .services-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(44px, 6vw, 80px);
+    line-height: 0.92;
+  }
+
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+  }
+
+  .service-card {
+    background-color: var(--color-surface);
+    border: 1px solid rgba(168,189,208,0.08);
+    padding: 40px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 220ms, transform 220ms, box-shadow 220ms;
+  }
+  .service-card:hover {
+    border-color: rgba(200,80,16,0.4);
+    transform: translateY(-4px);
+    box-shadow: 0 16px 48px rgba(200,80,16,0.1);
+  }
+
+  .card-accent-line {
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, var(--color-accent), transparent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 350ms ease-out;
+  }
+  .service-card:hover .card-accent-line { transform: scaleX(1); }
+
+  .card-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(28px, 3vw, 42px);
+    letter-spacing: 0.04em;
+    color: var(--color-chrome);
+    margin-bottom: 18px;
+    line-height: 1;
+  }
+
+  .card-body {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    color: rgba(168,189,208,0.7);
+    line-height: 1.75;
+  }
+
+  /* ── Founder Strip ── */
+  .founder-strip {
+    padding: 100px 0;
+    background-color: var(--color-surface);
+    border-top: 1px solid rgba(168,189,208,0.06);
+    border-bottom: 1px solid rgba(168,189,208,0.06);
+  }
+
+  .founder-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 72px;
+    align-items: center;
+  }
+
+  .founder-left {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .founder-headline {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(44px, 5.5vw, 76px);
+    line-height: 0.92;
+    margin-bottom: 8px;
+  }
+
+  .founder-bio {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    color: var(--color-silver);
+    line-height: 1.75;
+  }
+  .founder-bio--dim { color: rgba(168,189,208,0.65); }
+
+  .founder-right {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+  }
+
+  .founder-creds {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1px;
+    background-color: rgba(168,189,208,0.08);
+  }
+
+  .cred-item {
+    background-color: var(--color-surface);
+    padding: 28px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: center;
+    text-align: center;
+  }
+
+  .cred-number {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(36px, 4vw, 56px);
+    line-height: 1;
+  }
+
+  .cred-label {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    font-size: 0.65rem;
+    letter-spacing: 0.22em;
+    color: rgba(168,189,208,0.5);
+    text-transform: uppercase;
+  }
+
+  .founder-quote {
+    border-left: 3px solid var(--color-accent);
+    padding-left: 20px;
+  }
+  .founder-quote p {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(18px, 2vw, 24px);
+    color: var(--color-chrome);
+    line-height: 1.25;
+    letter-spacing: 0.02em;
+  }
+
+  /* ── Sports ── */
+  .sports-section {
+    padding: 100px 0;
+    background-color: var(--color-bg);
+  }
+
+  .sports-header {
+    margin-bottom: 56px;
+    text-align: center;
+  }
+
+  .sports-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(44px, 6vw, 80px);
+    line-height: 0.92;
+  }
+
+  .sports-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+  }
+
+  .sport-card {
+    display: block;
+    text-decoration: none;
+    background-color: var(--color-surface);
+    border: 1px solid rgba(168,189,208,0.08);
+    padding: 40px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 220ms, transform 220ms, box-shadow 220ms;
+  }
+  .sport-card:hover {
+    border-color: rgba(26,114,232,0.4);
+    transform: translateY(-4px);
+    box-shadow: 0 16px 48px rgba(26,114,232,0.1);
+  }
+
+  .sport-accent {
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, var(--color-brand), transparent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 350ms ease-out;
+  }
+  .sport-card:hover .sport-accent { transform: scaleX(1); }
+
+  .sport-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(48px, 6vw, 80px);
+    line-height: 0.9;
+    letter-spacing: 0.02em;
+    color: var(--color-chrome);
+    margin-bottom: 16px;
+  }
+
+  .sport-body {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14.5px;
+    color: rgba(168,189,208,0.65);
+    line-height: 1.7;
+    margin-bottom: 24px;
+  }
+
+  .sport-link {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-brand);
+    transition: color 200ms;
+  }
+  .sport-card:hover .sport-link { color: #3D9EFF; }
+
+  /* ── CTA ── */
+  .cta-section {
+    padding: 100px 0;
+    background: linear-gradient(135deg, #0E1220 0%, #0A0C10 50%, #0A0C10 100%);
+    border-top: 1px solid rgba(168,189,208,0.08);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cta-glow {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(ellipse 50% 70% at 50% 50%, rgba(200,80,16,0.08) 0%, transparent 70%);
+  }
+
+  .cta-inner {
+    position: relative;
+    z-index: 1;
+    max-width: 720px;
+    margin: 0 auto;
+    text-align: center;
+    padding: 0 clamp(24px, 4vw, 48px);
+  }
+
+  .cta-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(44px, 7vw, 96px);
+    line-height: 0.9;
+    margin-bottom: 24px;
+  }
+
+  .cta-body {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    color: var(--color-silver);
+    line-height: 1.75;
+    margin-bottom: 40px;
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .cta-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    justify-content: center;
+  }
+
+  /* ── Mobile ── */
+  @media (max-width: 640px) {
+    .hero-outline {
+      font-size: clamp(60px, 22vw, 100px);
+    }
+    .hero-solid {
+      font-size: clamp(60px, 22vw, 100px);
+    }
+    .founder-creds {
+      grid-template-columns: repeat(2, 1fr);
+    }
   }
 </style>
 
-<!-- Logo watermark -->
-<div class="watermark">
-  <img src="/logo.png" alt="" aria-hidden="true" />
-</div>
-
-<!-- Foreground text -->
-<div class="content">
-  <h1 class="headline">Coming Soon</h1>
-  <p class="tagline">Your Name. Your Brand. Your Future.</p>
-</div>
-
-</BaseLayout>
+<script>
+  const observer = new IntersectionObserver(
+    entries => entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible')
+        observer.unobserve(e.target)
+      }
+    }),
+    { threshold: 0.1, rootMargin: '-50px' }
+  )
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el))
+</script>
