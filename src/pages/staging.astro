@@ -1,0 +1,22 @@
+---
+import PublicLayout from '../layouts/PublicLayout.astro'
+import SplashScreen from '../components/interactive/SplashScreen'
+import HeroSection from '../components/interactive/HeroSection'
+import PillarCards from '../components/interactive/PillarCards'
+import FounderStrip from '../components/interactive/FounderStrip'
+import ServicesSection from '../components/interactive/ServicesSection'
+import StatsBar from '../components/interactive/StatsBar'
+---
+
+<PublicLayout
+  title="Hyche International Management Sports Group | NIL & Athlete Representation"
+  description="Boutique NIL and athlete representation agency founded by former Harlem Globetrotter Chris Hyche. Based in Jackson, Mississippi. Serving college and professional athletes nationwide."
+  noindex={true}
+>
+  <SplashScreen client:load />
+  <HeroSection client:load />
+  <PillarCards client:load />
+  <FounderStrip client:load />
+  <ServicesSection client:load />
+  <StatsBar client:load />
+</PublicLayout>
