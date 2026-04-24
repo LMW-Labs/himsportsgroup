@@ -222,7 +222,7 @@ function StatCounter({ value, label }: { value: string; label: string }) {
         WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
         filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.8)) drop-shadow(0 0 20px rgba(168,200,240,0.25))',
       }}>
-        {prefix}{displayed}{hasSuffix ? '+' : ''}{unit}
+        {prefix}{displayed}{unit}{hasSuffix ? '+' : ''}
       </span>
       <span style={{
         fontFamily: "'Rajdhani', sans-serif", fontWeight: 600,
