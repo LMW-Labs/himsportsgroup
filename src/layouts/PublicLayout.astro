@@ -1,6 +1,7 @@
 ---
 import BaseLayout from './BaseLayout.astro'
 import Footer from '../components/Footer.astro'
+import Nav from '../components/interactive/Nav'
 
 interface Props {
   title: string
@@ -13,7 +14,69 @@ const props = Astro.props
 ---
 
 <BaseLayout {...props}>
-  <!-- Nav island goes here in Phase 3 step 10 -->
+  <Nav client:load />
   <slot />
   <Footer />
 </BaseLayout>
+
+<style is:global>
+  /* ── Nav desktop / mobile visibility ── */
+  .nav-desktop {
+    display: none;
+    align-items: center;
+    gap: 36px;
+  }
+  @media (min-width: 1024px) {
+    .nav-desktop { display: flex; }
+  }
+
+  .nav-hamburger {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    z-index: 60;
+  }
+  @media (min-width: 1024px) {
+    .nav-hamburger { display: none; }
+  }
+
+  /* ── CTA button ── */
+  .nav-cta {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: #fff;
+    background: linear-gradient(180deg, #F4A060 0%, #E06828 30%, #C85010 60%, #8B3008 85%, #A04020 100%);
+    padding: 11px 26px;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid rgba(232,138,26,0.25);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.25), 0 4px 16px rgba(200,80,16,0.35);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+    transition: box-shadow 200ms, transform 200ms;
+    white-space: nowrap;
+  }
+  .nav-cta:hover { transform: translateY(-1px); }
+
+  /* ── Mobile full-screen overlay ── */
+  .mobile-menu {
+    position: fixed;
+    inset: 0;
+    background-color: #0A0C10;
+    z-index: 40;
+    overflow-y: auto;
+    padding: 96px 28px 48px;
+    transition: opacity 300ms ease, transform 300ms ease;
+  }
+  @media (min-width: 1024px) {
+    .mobile-menu { display: none; }
+  }
+</style>
