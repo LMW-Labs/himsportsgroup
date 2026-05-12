@@ -2,15 +2,68 @@ import { Telegraf } from 'telegraf'
 import { getSession, setSession, clearSession } from './lib/session.js'
 import { searchImages } from './lib/search.js'
 import { storePhoto } from './lib/storage.js'
-import { insertAthlete } from './lib/athlete.js'
+import {
+  insertAthlete,
+  listAthletes,
+  searchAthlete,
+  removeAthlete,
+  toggleFeatured,
+  updateAthlete,
+} from './lib/athlete.js'
 import { triggerDeploy } from './lib/deploy.js'
-import { parsePlayerMessage } from './lib/parse.js'
+import {
+  parsePlayerMessage,
+  parseNameCommand,
+  parseUpdateCommand,
+  parseListCommand,
+} from './lib/parse.js'
 
 export const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN)
+
+const HELP_TEXT = [
+  '*Hims Sports Group Bot — Commands*',
+  '',
+  '`Add player: Name, School, Position, Class Year`',
+  '  → Add a new player to the roster',
+  '',
+  '`List players`',
+  '  → Show all players',
+  '',
+  '`List players: School Name`',
+  '  → Filter players by school',
+  '',
+  '`Search player: Name`',
+  '  → Look up a player by name',
+  '',
+  '`Remove player: Name`',
+  '  → Unpublish a player from the site',
+  '',
+  '`Feature player: Name`',
+  '  → Toggle featured status on/off',
+  '',
+  '`Update player: Name | field: new value`',
+  '  → Edit school, position, class, or status',
+  '  Example: `Update player: Marcus Johnson | position: PG`',
+  '',
+  '`Help` — Show this message',
+].join('\n')
 
 function log(action, playerName) {
   console.log(JSON.stringify({ ts: new Date().toISOString(), action, player: playerName ?? null }))
 }
+
+function formatPlayer(p) {
+  const star = p.featured ? ' ⭐' : ''
+  const pub = p.published === false ? ' *(unpublished)*' : ''
+  return `*${p.name}*${star}${pub} — ${p.school} · ${p.position} · ${p.class_year ?? p.classYear}`
+}
+
+function ambiguousReply(matches) {
+  const lines = ['Multiple players found — be more specific:', ''].concat(matches.map(p => `• ${p.name} (${p.school})`))
+  return lines.join('\n')
+}
+
+// ── Add player flow ────────────────────────────────────────────────────────
 
 async function startAddFlow(ctx, playerData) {
   const chatId = ctx.chat.id
@@ -74,17 +127,48 @@ async function sendFinalPreview(ctx, playerData, imageUrl) {
   await ctx.reply('Reply *APPROVE* to publish, or *CANCEL* to discard.', { parse_mode: 'Markdown' })
 }
 
+// ── Remove flow (confirm before deleting) ─────────────────────────────────
+
+async function startRemoveFlow(ctx, name) {
+  const result = await removeAthlete(name)
+
+  if (result === null) {
+    await ctx.reply(`No player found matching *${name}*.`, { parse_mode: 'Markdown' })
+    return
+  }
+  if (result.ambiguous) {
+    await ctx.reply(ambiguousReply(result.ambiguous), { parse_mode: 'Markdown' })
+    return
+  }
+
+  log('removed', result.removed.name)
+  await triggerDeploy()
+  await ctx.reply(
+    `🗑 *${result.removed.name}* has been unpublished. The site will rebuild shortly.`,
+    { parse_mode: 'Markdown' }
+  )
+}
+
+// ── Text handler ───────────────────────────────────────────────────────────
+
 bot.on('text', async (ctx) => {
   const chatId = ctx.chat.id
   const text = ctx.message.text.trim()
   const session = await getSession(chatId)
   const step = session?.step ?? 'idle'
 
+  // ── Help ──────────────────────────────────────────────────────────────
+  if (/^help$/i.test(text)) {
+    await ctx.reply(HELP_TEXT, { parse_mode: 'Markdown' })
+    return
+  }
+
+  // ── Add player ────────────────────────────────────────────────────────
   if (/^add\s+player\s*:/i.test(text)) {
     const parsed = parsePlayerMessage(text)
     if (!parsed) {
       await ctx.reply(
-        'Please use the format:\n`Add player: Name, School, Position, Class Year`\n\nExample:\n`Add player: Marcus Johnson, Westview High School, SG, 2026`',
+        'Use the format:\n`Add player: Name, School, Position, Class Year`\n\nExample:\n`Add player: Marcus Johnson, Westview High, SG, 2026`',
         { parse_mode: 'Markdown' }
       )
       return
@@ -92,6 +176,159 @@ bot.on('text', async (ctx) => {
     await startAddFlow(ctx, parsed)
     return
   }
+
+  // ── List players ──────────────────────────────────────────────────────
+  if (/^list\s+players?/i.test(text)) {
+    const parsed = parseListCommand(text)
+    if (!parsed) {
+      await ctx.reply('Use: `List players` or `List players: School Name`', { parse_mode: 'Markdown' })
+      return
+    }
+    try {
+      const players = await listAthletes(parsed.school)
+      if (players.length === 0) {
+        const msg = parsed.school ? `No players found for *${parsed.school}*.` : 'No players on the roster yet.'
+        await ctx.reply(msg, { parse_mode: 'Markdown' })
+        return
+      }
+      const header = parsed.school ? `*Players — ${parsed.school}* (${players.length})` : `*All Players* (${players.length})`
+      const lines = players.map(p => formatPlayer(p))
+      const chunks = []
+      let chunk = header
+      for (const line of lines) {
+        if ((chunk + '\n' + line).length > 3800) {
+          chunks.push(chunk)
+          chunk = line
+        } else {
+          chunk += '\n' + line
+        }
+      }
+      chunks.push(chunk)
+      for (const c of chunks) {
+        await ctx.reply(c, { parse_mode: 'Markdown' })
+      }
+    } catch (err) {
+      console.error('List error:', err)
+      await ctx.reply('Could not load players. Please try again.')
+    }
+    return
+  }
+
+  // ── Search player ─────────────────────────────────────────────────────
+  if (/^search\s+player\s*:/i.test(text)) {
+    const name = parseNameCommand('search\\s+player', text)
+    if (!name) {
+      await ctx.reply('Use: `Search player: Name`', { parse_mode: 'Markdown' })
+      return
+    }
+    try {
+      const results = await searchAthlete(name)
+      if (results.length === 0) {
+        await ctx.reply(`No player found matching *${name}*.`, { parse_mode: 'Markdown' })
+        return
+      }
+      const lines = results.map(p => {
+        const star = p.featured ? ' ⭐' : ''
+        const pub = p.published === false ? ' *(unpublished)*' : ''
+        return [
+          `*${p.name}*${star}${pub}`,
+          `School: ${p.school}`,
+          `Position: ${p.position} · Class: ${p.class_year}`,
+          `Status: ${p.status}`,
+          p.photo_url ? `Photo: ${p.photo_url}` : 'No photo'
+        ].join('\n')
+      })
+      await ctx.reply(lines.join('\n\n'), { parse_mode: 'Markdown' })
+    } catch (err) {
+      console.error('Search error:', err)
+      await ctx.reply('Search failed. Please try again.')
+    }
+    return
+  }
+
+  // ── Remove player ─────────────────────────────────────────────────────
+  if (/^remove\s+player\s*:/i.test(text)) {
+    const name = parseNameCommand('remove\\s+player', text)
+    if (!name) {
+      await ctx.reply('Use: `Remove player: Name`', { parse_mode: 'Markdown' })
+      return
+    }
+    await startRemoveFlow(ctx, name)
+    return
+  }
+
+  // ── Feature player ────────────────────────────────────────────────────
+  if (/^feature\s+player\s*:/i.test(text)) {
+    const name = parseNameCommand('feature\\s+player', text)
+    if (!name) {
+      await ctx.reply('Use: `Feature player: Name`', { parse_mode: 'Markdown' })
+      return
+    }
+    try {
+      const result = await toggleFeatured(name)
+      if (result === null) {
+        await ctx.reply(`No player found matching *${name}*.`, { parse_mode: 'Markdown' })
+        return
+      }
+      if (result.ambiguous) {
+        await ctx.reply(ambiguousReply(result.ambiguous), { parse_mode: 'Markdown' })
+        return
+      }
+      const label = result.newFeatured ? '⭐ Featured' : 'Unfeatured'
+      log('featured_toggle', result.player.name)
+      await triggerDeploy()
+      await ctx.reply(
+        `${label}: *${result.player.name}*. Site will rebuild shortly.`,
+        { parse_mode: 'Markdown' }
+      )
+    } catch (err) {
+      console.error('Feature error:', err)
+      await ctx.reply('Could not update featured status. Please try again.')
+    }
+    return
+  }
+
+  // ── Update player ─────────────────────────────────────────────────────
+  if (/^update\s+player\s*:/i.test(text)) {
+    const parsed = parseUpdateCommand(text)
+    if (!parsed) {
+      await ctx.reply(
+        'Use: `Update player: Name | field: new value`\n\nExample:\n`Update player: Marcus Johnson | position: PG`\n\nEditable fields: school, position, class, status',
+        { parse_mode: 'Markdown' }
+      )
+      return
+    }
+    try {
+      const result = await updateAthlete(parsed.name, parsed.field, parsed.value)
+      if (result === null) {
+        await ctx.reply(`No player found matching *${parsed.name}*.`, { parse_mode: 'Markdown' })
+        return
+      }
+      if (result.ambiguous) {
+        await ctx.reply(ambiguousReply(result.ambiguous), { parse_mode: 'Markdown' })
+        return
+      }
+      if (result.unknownField) {
+        await ctx.reply(
+          `Unknown field *${result.unknownField}*. Editable fields: school, position, class, status`,
+          { parse_mode: 'Markdown' }
+        )
+        return
+      }
+      log('updated', result.player.name)
+      await triggerDeploy()
+      await ctx.reply(
+        `✏️ Updated *${result.player.name}*: ${parsed.field} → \`${result.value}\`. Site will rebuild shortly.`,
+        { parse_mode: 'Markdown' }
+      )
+    } catch (err) {
+      console.error('Update error:', err)
+      await ctx.reply('Could not update player. Please try again.')
+    }
+    return
+  }
+
+  // ── Session steps ─────────────────────────────────────────────────────
 
   if (step === 'await_image') {
     const candidates = session.image_candidates ?? []
@@ -140,10 +377,12 @@ bot.on('text', async (ctx) => {
   }
 
   await ctx.reply(
-    'Send `Add player: Name, School, Position, Class Year` to add a player.\n\nExample:\n`Add player: Marcus Johnson, Westview High School, SG, 2026`',
+    'Send `Help` to see all available commands.',
     { parse_mode: 'Markdown' }
   )
 })
+
+// ── Photo handler ──────────────────────────────────────────────────────────
 
 bot.on('photo', async (ctx) => {
   const chatId = ctx.chat.id
@@ -151,7 +390,7 @@ bot.on('photo', async (ctx) => {
 
   if (session?.step !== 'await_upload') {
     await ctx.reply(
-      'Send `Add player: Name, School, Position, Class Year` to get started.',
+      'Send `Help` to see all available commands.',
       { parse_mode: 'Markdown' }
     )
     return
