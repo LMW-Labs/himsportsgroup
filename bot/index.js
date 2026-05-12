@@ -24,7 +24,9 @@ const HELP_TEXT = [
   '*Hims Sports Group Bot — Commands*',
   '',
   '`Add player: Name, School, Position, Class Year`',
-  '  → Add a new player to the roster',
+  '`Add player: Name, School, Position, Class Year, available`',
+  '`Add player: Name, School, Position, Class Year, signed`',
+  '  → Add a new player (availability defaults to *available*)',
   '',
   '`List players`',
   '  → Show all players',
@@ -42,8 +44,8 @@ const HELP_TEXT = [
   '  → Toggle featured status on/off',
   '',
   '`Update player: Name | field: new value`',
-  '  → Edit school, position, class, or status',
-  '  Example: `Update player: Marcus Johnson | position: PG`',
+  '  → Edit school, position, class, status, or *availability*',
+  '  Example: `Update player: Marcus Johnson | availability: signed`',
   '',
   '`Help` — Show this message',
 ].join('\n')
@@ -52,10 +54,16 @@ function log(action, playerName) {
   console.log(JSON.stringify({ ts: new Date().toISOString(), action, player: playerName ?? null }))
 }
 
+function availabilityLabel(a) {
+  if (a === 'signed') return '🔒 Signed'
+  return '🟢 Available'
+}
+
 function formatPlayer(p) {
   const star = p.featured ? ' ⭐' : ''
   const pub = p.published === false ? ' *(unpublished)*' : ''
-  return `*${p.name}*${star}${pub} — ${p.school} · ${p.position} · ${p.class_year ?? p.classYear}`
+  const avail = p.availability ? ` · ${availabilityLabel(p.availability)}` : ''
+  return `*${p.name}*${star}${pub} — ${p.school} · ${p.position} · ${p.class_year ?? p.classYear}${avail}`
 }
 
 function ambiguousReply(matches) {
@@ -111,7 +119,8 @@ async function sendFinalPreview(ctx, playerData, imageUrl) {
     `*Name:* ${playerData.name}`,
     `*School:* ${playerData.school}`,
     `*Position:* ${playerData.position}`,
-    `*Class:* ${playerData.classYear}`
+    `*Class:* ${playerData.classYear}`,
+    `*Availability:* ${availabilityLabel(playerData.availability ?? 'available')}`
   ].join('\n')
 
   if (imageUrl) {
@@ -234,6 +243,7 @@ bot.on('text', async (ctx) => {
           `*${p.name}*${star}${pub}`,
           `School: ${p.school}`,
           `Position: ${p.position} · Class: ${p.class_year}`,
+          `Availability: ${availabilityLabel(p.availability ?? 'available')}`,
           `Status: ${p.status}`,
           p.photo_url ? `Photo: ${p.photo_url}` : 'No photo'
         ].join('\n')
@@ -293,7 +303,7 @@ bot.on('text', async (ctx) => {
     const parsed = parseUpdateCommand(text)
     if (!parsed) {
       await ctx.reply(
-        'Use: `Update player: Name | field: new value`\n\nExample:\n`Update player: Marcus Johnson | position: PG`\n\nEditable fields: school, position, class, status',
+        'Use: `Update player: Name | field: new value`\n\nExample:\n`Update player: Marcus Johnson | availability: signed`\n\nEditable fields: school, position, class, status, availability',
         { parse_mode: 'Markdown' }
       )
       return
@@ -310,7 +320,14 @@ bot.on('text', async (ctx) => {
       }
       if (result.unknownField) {
         await ctx.reply(
-          `Unknown field *${result.unknownField}*. Editable fields: school, position, class, status`,
+          `Unknown field *${result.unknownField}*. Editable fields: school, position, class, status, availability`,
+          { parse_mode: 'Markdown' }
+        )
+        return
+      }
+      if (result.invalidValue) {
+        await ctx.reply(
+          `Invalid value for *availability*: \`${result.invalidValue}\`\nMust be \`available\` or \`signed\`.`,
           { parse_mode: 'Markdown' }
         )
         return

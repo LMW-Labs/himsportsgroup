@@ -1,3 +1,5 @@
+const VALID_AVAILABILITY = ['available', 'signed']
+
 export function parsePlayerMessage(text) {
   const match = text.match(/add\s+player\s*:\s*(.+)/i)
   if (!match) return null
@@ -5,11 +7,15 @@ export function parsePlayerMessage(text) {
   const parts = match[1].split(',').map(s => s.trim()).filter(Boolean)
   if (parts.length < 4) return null
 
+  const rawAvailability = (parts[4] ?? 'available').toLowerCase()
+  const availability = VALID_AVAILABILITY.includes(rawAvailability) ? rawAvailability : 'available'
+
   return {
     name: parts[0],
     school: parts[1],
     position: parts[2].toUpperCase(),
-    classYear: parts[3]
+    classYear: parts[3],
+    availability,
   }
 }
 

@@ -15,7 +15,7 @@ async function uniqueSlug(name) {
   }
 }
 
-export async function insertAthlete({ name, school, position, classYear, imageUrl }) {
+export async function insertAthlete({ name, school, position, classYear, imageUrl, availability = 'available' }) {
   const slug = await uniqueSlug(name)
   const { data, error } = await db
     .from('athletes')
@@ -27,6 +27,7 @@ export async function insertAthlete({ name, school, position, classYear, imageUr
       class_year: classYear,
       sport: 'basketball',
       status: 'nil_client',
+      availability,
       photo_url: imageUrl || null,
       published: true,
       featured: false
@@ -41,7 +42,7 @@ export async function insertAthlete({ name, school, position, classYear, imageUr
 export async function listAthletes(school = null) {
   let query = db
     .from('athletes')
-    .select('name, school, position, class_year, featured, published')
+    .select('name, school, position, class_year, featured, published, availability')
     .order('name')
 
   if (school) {
@@ -101,6 +102,7 @@ const UPDATABLE_FIELDS = {
   classyear: 'class_year',
   status: 'status',
   name: 'name',
+  availability: 'availability',
 }
 
 export async function updateAthlete(name, field, value) {
@@ -111,7 +113,10 @@ export async function updateAthlete(name, field, value) {
   if (matches.length === 0) return null
   if (matches.length > 1) return { ambiguous: matches }
 
-  const update = { [col]: col === 'position' ? value.toUpperCase() : value }
+  if (col === 'availability' && !['available', 'signed'].includes(value.toLowerCase())) {
+    return { invalidValue: value, field: 'availability' }
+  }
+  const update = { [col]: col === 'position' ? value.toUpperCase() : col === 'availability' ? value.toLowerCase() : value }
   const { error } = await db
     .from('athletes')
     .update(update)

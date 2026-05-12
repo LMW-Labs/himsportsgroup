@@ -3,6 +3,7 @@
 // Run: npx supabase gen types typescript --project-id <project-id> > src/lib/supabase/types.ts
 
 export type AthleteStatus = 'nil_client' | 'pro_prospect' | 'rising_star' | 'alumni'
+export type AthleteAvailability = 'available' | 'signed'
 
 export interface Athlete {
   id: string
@@ -14,6 +15,7 @@ export interface Athlete {
   class_year: string | null
   division: string | null
   status: AthleteStatus
+  availability: AthleteAvailability
   photo_url: string | null
   nil_value_display: string | null
   featured: boolean
