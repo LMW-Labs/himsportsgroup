@@ -1,0 +1,439 @@
+---
+import PublicLayout from '../../layouts/PublicLayout.astro'
+
+const players = [
+  {
+    name: 'Halvine Dzellat',
+    height: "6'10",
+    position: 'F/C',
+    school: 'Cincinnati',
+    note: 'Transfer Portal',
+    origin: null,
+  },
+  {
+    name: 'Akram Naji',
+    height: "6'4",
+    position: 'PG',
+    school: 'France',
+    note: null,
+    origin: 'France',
+  },
+  {
+    name: 'Aurele Brena',
+    height: "6'3",
+    position: 'PG',
+    school: 'France',
+    note: null,
+    origin: 'France',
+  },
+  {
+    name: 'Bissokot Aristote',
+    height: "6'9",
+    position: 'SF/PF',
+    school: 'Austria',
+    note: null,
+    origin: 'Austria',
+  },
+  {
+    name: 'Dontavius King',
+    height: "6'8",
+    position: 'PF',
+    school: 'Midway University',
+    note: 'NAIA',
+    origin: null,
+  },
+  {
+    name: 'Trey Alexander',
+    height: "6'1",
+    position: 'PG',
+    school: 'Holmes CC',
+    note: null,
+    origin: null,
+  },
+  {
+    name: 'Sasa Lazic',
+    height: "6'8",
+    position: 'PF',
+    school: 'Greece',
+    note: null,
+    origin: 'Greece',
+  },
+  {
+    name: 'Jakub Solden',
+    height: "6'9",
+    position: 'PF',
+    school: 'Finland',
+    note: null,
+    origin: 'Finland',
+  },
+  {
+    name: 'Christian Blomfelt',
+    height: "6'6",
+    position: 'SG/SF',
+    school: 'Finland',
+    note: null,
+    origin: 'Finland',
+  },
+  {
+    name: 'Brentay Noel',
+    height: "6'10",
+    position: 'PF/C',
+    school: 'ULM',
+    note: 'Needs Waiver',
+    origin: null,
+  },
+]
+---
+
+<PublicLayout
+  title="Basketball Roster | Hyche International Management Sports Group"
+  description="Hyche International Management Sports Group basketball roster — 10 elite players from college, professional leagues, and international programs worldwide."
+>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-glow" aria-hidden="true"></div>
+    <div class="hero-grid" aria-hidden="true"></div>
+    <div class="hero-inner">
+      <div class="split-type">
+        <span class="split-solid">BASKETBALL</span>
+        <span class="split-outline">ROSTER</span>
+      </div>
+      <p class="hero-body">
+        {players.length} athletes. College, professional, and international&nbsp;—&nbsp;built for the next level.
+      </p>
+    </div>
+  </section>
+
+  <!-- Sub-nav -->
+  <nav class="subnav">
+    <div class="subnav-inner">
+      <a href="/athletes" class="subnav-link">ALL</a>
+      <span class="subnav-sep">/</span>
+      <a href="/athletes/basketball" class="subnav-link active">BASKETBALL</a>
+      <span class="subnav-sep">/</span>
+      <a href="/athletes/nil" class="subnav-link">NIL</a>
+    </div>
+  </nav>
+
+  <!-- Roster -->
+  <section class="roster-section">
+    <div class="container">
+      <div class="roster-header reveal">
+        <div class="roster-meta">
+          <p class="eyebrow">Current Roster</p>
+          <h2 class="section-title">THE SQUAD</h2>
+        </div>
+        <div class="roster-count">
+          <span class="count-num">{players.length}</span>
+          <span class="count-label">Athletes</span>
+        </div>
+      </div>
+
+      <div class="player-grid">
+        {players.map((player, i) => (
+          <div class="player-card reveal" style={`--delay:${(i % 4) * 0.08}s`}>
+            <div class="card-accent-line" aria-hidden="true"></div>
+            <div class="card-number">{String(i + 1).padStart(2, '0')}</div>
+            <div class="card-body">
+              <div class="player-meta">
+                <span class="player-position">{player.position}</span>
+                <span class="player-height">{player.height}</span>
+              </div>
+              <h3 class="player-name">{player.name}</h3>
+              <div class="player-school-row">
+                <span class="player-school">{player.school}</span>
+                {player.note && (
+                  <span class={`player-badge ${player.note === 'Needs Waiver' ? 'badge-warning' : player.note === 'Transfer Portal' ? 'badge-portal' : 'badge-info'}`}>
+                    {player.note}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section">
+    <div class="cta-glow" aria-hidden="true"></div>
+    <div class="cta-inner reveal">
+      <p class="eyebrow">Ready to Work Together?</p>
+      <h2 class="cta-title">APPLY FOR REPRESENTATION</h2>
+      <p class="cta-body">
+        We work with a select group of athletes at every stage of their career.
+        Tell us about yourself and we'll reach out within 48 hours.
+      </p>
+      <a href="/contact" class="cta-btn">Apply for Representation →</a>
+    </div>
+  </section>
+
+</PublicLayout>
+
+<style>
+  /* ── Hero ── */
+  .hero {
+    background-color: var(--color-bg);
+    min-height: 60vh;
+    display: flex;
+    align-items: flex-end;
+    padding-bottom: 80px;
+    position: relative;
+    overflow: hidden;
+    padding-top: 120px;
+  }
+  .hero-glow {
+    position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(ellipse 70% 60% at 30% 50%, rgba(26,114,232,0.10) 0%, transparent 70%);
+  }
+  .hero-grid {
+    position: absolute; inset: 0; pointer-events: none;
+    opacity: 0.025;
+    background-image:
+      linear-gradient(rgba(168,189,208,1) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(168,189,208,1) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+  .hero-inner {
+    position: relative; z-index: 1;
+    width: 100%; max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 clamp(24px, 4vw, 96px);
+  }
+  .split-type {
+    display: flex; flex-direction: column; gap: 0; margin-bottom: 32px;
+  }
+  .split-solid {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(72px, 12vw, 160px);
+    line-height: 0.88; letter-spacing: 0.01em;
+    color: var(--color-chrome); display: block;
+  }
+  .split-outline {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(72px, 12vw, 160px);
+    line-height: 0.88; letter-spacing: 0.01em;
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(168,189,208,0.4);
+    display: block; text-align: right;
+  }
+  .hero-body {
+    font-family: 'DM Sans', sans-serif;
+    font-size: clamp(15px, 1.5vw, 18px);
+    color: var(--color-silver);
+    max-width: 480px; line-height: 1.6;
+  }
+
+  /* ── Sub-nav ── */
+  .subnav {
+    position: sticky; top: 72px; z-index: 20;
+    background-color: rgba(10,12,16,0.97);
+    border-bottom: 1px solid rgba(168,189,208,0.1);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    overflow-x: auto;
+  }
+  .subnav-inner {
+    display: flex; align-items: center;
+    max-width: 1400px; margin: 0 auto;
+    padding: 0 clamp(24px, 4vw, 96px);
+  }
+  .subnav-link {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700; font-size: 11px;
+    letter-spacing: 0.15em; text-transform: uppercase;
+    text-decoration: none;
+    color: rgba(168,189,208,0.6);
+    padding: 16px 12px;
+    white-space: nowrap; position: relative;
+    transition: color 200ms;
+  }
+  .subnav-link:hover, .subnav-link.active { color: var(--color-chrome); }
+  .subnav-link.active::after {
+    content: '';
+    position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+    background: var(--color-accent);
+  }
+  .subnav-sep {
+    font-family: 'Rajdhani', sans-serif;
+    color: rgba(168,189,208,0.2); font-size: 12px;
+    padding: 0 4px; user-select: none;
+  }
+
+  /* ── Roster ── */
+  .roster-section {
+    padding: 80px 0 96px;
+    background-color: var(--color-bg);
+  }
+  .container {
+    max-width: 1400px; margin: 0 auto;
+    padding: 0 clamp(24px, 4vw, 96px);
+  }
+  .roster-header {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    margin-bottom: 56px; flex-wrap: wrap; gap: 24px;
+  }
+  .eyebrow {
+    font-family: 'Rajdhani', sans-serif; font-weight: 700;
+    font-size: 0.72rem; letter-spacing: 0.32em; color: var(--color-accent);
+    text-transform: uppercase; margin-bottom: 8px;
+  }
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(40px, 5vw, 64px);
+    letter-spacing: 0.02em; color: var(--color-chrome);
+    line-height: 0.92;
+  }
+  .roster-count {
+    text-align: right;
+  }
+  .count-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(52px, 6vw, 80px);
+    color: var(--color-chrome); line-height: 1; display: block;
+  }
+  .count-label {
+    font-family: 'Rajdhani', sans-serif; font-weight: 700;
+    font-size: 0.68rem; letter-spacing: 0.28em;
+    color: rgba(168,189,208,0.45); text-transform: uppercase;
+  }
+
+  /* ── Player grid ── */
+  .player-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 2px;
+  }
+  .player-card {
+    position: relative; overflow: hidden;
+    background-color: var(--color-surface);
+    border: 1px solid rgba(168,189,208,0.07);
+    padding: 32px 28px 28px;
+    transition: border-color 220ms, transform 220ms, box-shadow 220ms;
+  }
+  .player-card:hover {
+    border-color: rgba(200,80,16,0.45);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 40px rgba(200,80,16,0.10);
+    z-index: 1;
+  }
+  .card-accent-line {
+    position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, #C85010, transparent);
+    transform: scaleX(0); transform-origin: left;
+    transition: transform 350ms ease-out;
+  }
+  .player-card:hover .card-accent-line { transform: scaleX(1); }
+  .card-number {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.85rem; letter-spacing: 0.12em;
+    color: rgba(200,80,16,0.35);
+    margin-bottom: 20px;
+  }
+  .card-body { display: flex; flex-direction: column; gap: 8px; }
+  .player-meta {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 4px;
+  }
+  .player-position {
+    font-family: 'Rajdhani', sans-serif; font-weight: 700;
+    font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--color-brand);
+    background: rgba(26,114,232,0.12);
+    border: 1px solid rgba(26,114,232,0.25);
+    padding: 3px 9px;
+  }
+  .player-height {
+    font-family: 'Rajdhani', sans-serif; font-weight: 600;
+    font-size: 13px; letter-spacing: 0.08em;
+    color: rgba(168,189,208,0.55);
+  }
+  .player-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(26px, 3vw, 36px);
+    line-height: 0.95; letter-spacing: 0.02em;
+    color: var(--color-chrome);
+  }
+  .player-school-row {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    margin-top: 4px;
+  }
+  .player-school {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13.5px;
+    color: rgba(168,189,208,0.65);
+  }
+  .player-badge {
+    font-family: 'Rajdhani', sans-serif; font-weight: 700;
+    font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase;
+    padding: 3px 8px;
+  }
+  .badge-warning {
+    background: rgba(234,179,8,0.15);
+    color: #eab308;
+    border: 1px solid rgba(234,179,8,0.3);
+  }
+  .badge-portal {
+    background: rgba(168,85,247,0.15);
+    color: #a855f7;
+    border: 1px solid rgba(168,85,247,0.3);
+  }
+  .badge-info {
+    background: rgba(168,189,208,0.1);
+    color: rgba(168,189,208,0.7);
+    border: 1px solid rgba(168,189,208,0.2);
+  }
+
+  /* ── CTA ── */
+  .cta-section {
+    padding: 96px 0;
+    background: linear-gradient(135deg, #0E1220 0%, #0A0C10 100%);
+    border-top: 1px solid rgba(168,189,208,0.08);
+    position: relative; overflow: hidden;
+  }
+  .cta-glow {
+    position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(ellipse 50% 80% at 50% 50%, rgba(200,80,16,0.07) 0%, transparent 70%);
+  }
+  .cta-inner {
+    position: relative; z-index: 1;
+    max-width: 640px; margin: 0 auto; text-align: center;
+    padding: 0 clamp(24px, 4vw, 48px);
+  }
+  .cta-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(40px, 6vw, 80px);
+    letter-spacing: 0.02em; color: var(--color-chrome);
+    margin-bottom: 24px;
+  }
+  .cta-body {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px; color: var(--color-silver);
+    line-height: 1.75; margin-bottom: 40px;
+    max-width: 480px; margin-left: auto; margin-right: auto;
+  }
+  .cta-btn {
+    display: inline-block;
+    font-family: 'Rajdhani', sans-serif; font-weight: 700;
+    font-size: 0.88rem; letter-spacing: 0.15em; text-transform: uppercase;
+    text-decoration: none; color: #fff;
+    background-color: #C85010;
+    padding: 16px 40px;
+    transition: opacity 150ms;
+  }
+  .cta-btn:hover { opacity: 0.9; }
+
+  /* ── Reveal animation ── */
+  .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease, transform 0.6s ease; transition-delay: var(--delay, 0s); }
+  .reveal.visible { opacity: 1; transform: none; }
+</style>
+
+<script>
+  const observer = new IntersectionObserver(
+    entries => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } }),
+    { threshold: 0.08, rootMargin: '-30px' }
+  )
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el))
+</script>
