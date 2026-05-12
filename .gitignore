@@ -12,10 +12,13 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-
 # environment variables
 .env
 .env.production
+
+# Google service account key files
+*.service-account.json
+*-credentials.json
 
 # macOS-specific files
 .DS_Store
