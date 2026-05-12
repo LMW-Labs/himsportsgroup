@@ -9,7 +9,8 @@
     "dev": "npx astro dev",
     "build": "npx astro build",
     "preview": "npx astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "set-webhook": "node scripts/set-webhook.js"
   },
   "dependencies": {
     "@astrojs/react": "^5.0.3",
@@ -18,9 +19,11 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "astro": "^6.1.8",
+    "google-auth-library": "^9.0.0",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
-    "tailwindcss": "^4.2.4"
+    "tailwindcss": "^4.2.4",
+    "telegraf": "^4.16.3"
   },
   "devDependencies": {
     "dotenv": "^17.4.2"
