@@ -22,45 +22,38 @@ import {
 
 export const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN)
 
-const HELP_TEXT = [
-  '*Hims Sports Group Bot — Commands*',
-  '',
-  '`Add player: Name, School, Position, Class Year`',
-  '`Add player: Name, School, Position, Class Year, available`',
-  '`Add player: Name, School, Position, Class Year, signed`',
-  '  → Add a new player (availability defaults to *available*)',
-  '',
-  '`List players`',
-  '  → Show all players',
-  '',
-  '`List players: School Name`',
-  '  → Filter players by school',
-  '',
-  '`Search player: Name`',
-  '  → Look up a player by name',
-  '',
-  '`Remove player: Name`',
-  '  → Unpublish a player from the site',
-  '',
-  '`Feature player: Name`',
-  '  → Toggle featured status on/off',
-  '',
-  '`Update player: Name | field: new value`',
-  '  → Edit school, position, class, status, availability, or height',
-  '  Example: `Update player: Marcus Johnson | availability: signed`',
-  '',
-  '`Roster update:`  _(then one player per line)_',
-  '`Name, Position, School, available|signed`',
-  '`Name, Position, School, available|signed, Height`',
-  '  → Bulk add/update. Existing players matched by name are updated;',
-  '    new names are added. One deploy triggered at the end.',
-  '  Example:',
-  '  `Roster update:`',
-  '  `Trey Alexander, PG, Holmes CC, available, 6\'1`',
-  '  `Marcus Johnson, SG, Westview High, signed`',
-  '',
-  '`Help` — Show this message',
-].join('\n')
+const HELP_TEXT = `*HIMS SPORTS GROUP — BOT COMMANDS*
+
+➕ *ADD PLAYER*
+\`Add player: Name, School, Position, Class, available|signed\`
+_Availability optional — defaults to available_
+
+📋 *BULK ROSTER*
+\`Roster update:\`
+\`Name, Position, School, available|signed\`
+\`Name, Position, School, available|signed, Height\`
+_Upserts by name — adds new players, updates existing_
+
+🔍 *SEARCH*
+\`Search player: Name\`
+
+📄 *LIST*
+\`List players\`
+\`List players: School Name\`
+
+✏️ *UPDATE A FIELD*
+\`Update player: Name | field: value\`
+_Fields: school · position · class · height · availability · status_
+_Status values: nil\\_client · pro\\_prospect · rising\\_star · alumni_
+
+⭐ *FEATURE TOGGLE*
+\`Feature player: Name\`
+
+🗑 *REMOVE*
+\`Remove player: Name\`
+
+❓ *HELP*
+\`Help\``
 
 function log(action, playerName) {
   console.log(JSON.stringify({ ts: new Date().toISOString(), action, player: playerName ?? null }))
