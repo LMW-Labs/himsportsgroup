@@ -9,6 +9,7 @@ import {
   removeAthlete,
   toggleFeatured,
   updateAthlete,
+  upsertRoster,
 } from './lib/athlete.js'
 import { triggerDeploy } from './lib/deploy.js'
 import {
@@ -16,6 +17,7 @@ import {
   parseNameCommand,
   parseUpdateCommand,
   parseListCommand,
+  parseBulkRoster,
 } from './lib/parse.js'
 
 export const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN)
@@ -44,8 +46,18 @@ const HELP_TEXT = [
   '  → Toggle featured status on/off',
   '',
   '`Update player: Name | field: new value`',
-  '  → Edit school, position, class, status, or *availability*',
+  '  → Edit school, position, class, status, availability, or height',
   '  Example: `Update player: Marcus Johnson | availability: signed`',
+  '',
+  '`Roster update:`  _(then one player per line)_',
+  '`Name, Position, School, available|signed`',
+  '`Name, Position, School, available|signed, Height`',
+  '  → Bulk add/update. Existing players matched by name are updated;',
+  '    new names are added. One deploy triggered at the end.',
+  '  Example:',
+  '  `Roster update:`',
+  '  `Trey Alexander, PG, Holmes CC, available, 6\'1`',
+  '  `Marcus Johnson, SG, Westview High, signed`',
   '',
   '`Help` — Show this message',
 ].join('\n')
@@ -63,7 +75,8 @@ function formatPlayer(p) {
   const star = p.featured ? ' ⭐' : ''
   const pub = p.published === false ? ' *(unpublished)*' : ''
   const avail = p.availability ? ` · ${availabilityLabel(p.availability)}` : ''
-  return `*${p.name}*${star}${pub} — ${p.school} · ${p.position} · ${p.class_year ?? p.classYear}${avail}`
+  const ht = p.height ? ` · ${p.height}` : ''
+  return `*${p.name}*${star}${pub} — ${p.school} · ${p.position}${ht} · ${p.class_year ?? p.classYear ?? '—'}${avail}`
 }
 
 function ambiguousReply(matches) {
@@ -341,6 +354,37 @@ bot.on('text', async (ctx) => {
     } catch (err) {
       console.error('Update error:', err)
       await ctx.reply('Could not update player. Please try again.')
+    }
+    return
+  }
+
+  // ── Bulk roster upsert ────────────────────────────────────────────────
+  if (/^roster(\s+update)?\s*:/i.test(text)) {
+    const rows = parseBulkRoster(text)
+    if (!rows) {
+      await ctx.reply(
+        'Use the format:\n`Roster update:`\n`Name, Position, School, available|signed`\n`Name, Position, School, available|signed, Height`',
+        { parse_mode: 'Markdown' }
+      )
+      return
+    }
+    try {
+      await ctx.reply(`Processing ${rows.length} player${rows.length === 1 ? '' : 's'}…`)
+      const results = await upsertRoster(rows)
+      await triggerDeploy()
+
+      const lines = ['*Roster updated:*', '']
+      if (results.added.length) lines.push(`✅ Added (${results.added.length}): ${results.added.join(', ')}`)
+      if (results.updated.length) lines.push(`✏️ Updated (${results.updated.length}): ${results.updated.join(', ')}`)
+      if (results.failed.length) {
+        lines.push(`❌ Failed (${results.failed.length}):`)
+        results.failed.forEach(f => lines.push(`  • ${f.name}: ${f.reason}`))
+      }
+      lines.push('', 'Site will rebuild shortly.')
+      await ctx.reply(lines.join('\n'), { parse_mode: 'Markdown' })
+    } catch (err) {
+      console.error('Bulk upsert error:', err)
+      await ctx.reply('Bulk update failed. Please try again.')
     }
     return
   }

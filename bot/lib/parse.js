@@ -36,3 +36,27 @@ export function parseListCommand(text) {
   if (!match) return null
   return { school: match[1]?.trim() ?? null }
 }
+
+export function parseBulkRoster(text) {
+  const headerMatch = text.match(/^roster\s*(?:update)?\s*:\s*\n([\s\S]+)/i)
+  if (!headerMatch) return null
+
+  const rows = []
+  const lines = headerMatch[1].split('\n').map(l => l.trim()).filter(Boolean)
+
+  for (const line of lines) {
+    const parts = line.split(',').map(s => s.trim()).filter(Boolean)
+    if (parts.length < 3) continue
+
+    const name = parts[0]
+    const position = parts[1]
+    const school = parts[2]
+    const rawAvail = (parts[3] ?? 'available').toLowerCase()
+    const availability = ['available', 'signed'].includes(rawAvail) ? rawAvail : 'available'
+    const height = parts[4]?.trim() || null
+
+    rows.push({ name, position, school, availability, height })
+  }
+
+  return rows.length > 0 ? rows : null
+}

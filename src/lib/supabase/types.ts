@@ -16,6 +16,7 @@ export interface Athlete {
   division: string | null
   status: AthleteStatus
   availability: AthleteAvailability
+  height: string | null
   photo_url: string | null
   nil_value_display: string | null
   featured: boolean

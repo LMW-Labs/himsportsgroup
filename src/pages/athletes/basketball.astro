@@ -1,93 +1,25 @@
 ---
 import PublicLayout from '../../layouts/PublicLayout.astro'
+import { supabase } from '../../lib/supabase/client'
+import type { Athlete } from '../../lib/supabase/types'
 
-const players = [
-  {
-    name: 'Halvine Dzellat',
-    height: "6'10",
-    position: 'F/C',
-    school: 'Cincinnati',
-    note: 'Transfer Portal',
-    origin: null,
-  },
-  {
-    name: 'Akram Naji',
-    height: "6'4",
-    position: 'PG',
-    school: 'France',
-    note: null,
-    origin: 'France',
-  },
-  {
-    name: 'Aurele Brena',
-    height: "6'3",
-    position: 'PG',
-    school: 'France',
-    note: null,
-    origin: 'France',
-  },
-  {
-    name: 'Bissokot Aristote',
-    height: "6'9",
-    position: 'SF/PF',
-    school: 'Austria',
-    note: null,
-    origin: 'Austria',
-  },
-  {
-    name: 'Dontavius King',
-    height: "6'8",
-    position: 'PF',
-    school: 'Midway University',
-    note: 'NAIA',
-    origin: null,
-  },
-  {
-    name: 'Trey Alexander',
-    height: "6'1",
-    position: 'PG',
-    school: 'Holmes CC',
-    note: null,
-    origin: null,
-  },
-  {
-    name: 'Sasa Lazic',
-    height: "6'8",
-    position: 'PF',
-    school: 'Greece',
-    note: null,
-    origin: 'Greece',
-  },
-  {
-    name: 'Jakub Solden',
-    height: "6'9",
-    position: 'PF',
-    school: 'Finland',
-    note: null,
-    origin: 'Finland',
-  },
-  {
-    name: 'Christian Blomfelt',
-    height: "6'6",
-    position: 'SG/SF',
-    school: 'Finland',
-    note: null,
-    origin: 'Finland',
-  },
-  {
-    name: 'Brentay Noel',
-    height: "6'10",
-    position: 'PF/C',
-    school: 'ULM',
-    note: 'Needs Waiver',
-    origin: null,
-  },
-]
+let players: Athlete[] = []
+try {
+  const { data } = await supabase
+    .from('athletes')
+    .select('*')
+    .eq('published', true)
+    .eq('sport', 'basketball')
+    .order('name')
+  players = data ?? []
+} catch {
+  // Build continues with empty roster
+}
 ---
 
 <PublicLayout
   title="Basketball Roster | Hyche International Management Sports Group"
-  description="Hyche International Management Sports Group basketball roster — 10 elite players from college, professional leagues, and international programs worldwide."
+  description="Hyche International Management Sports Group basketball roster — elite players from college, professional leagues, and international programs worldwide."
 >
 
   <!-- Hero -->
@@ -100,7 +32,9 @@ const players = [
         <span class="split-outline">ROSTER</span>
       </div>
       <p class="hero-body">
-        {players.length} athletes. College, professional, and international&nbsp;—&nbsp;built for the next level.
+        {players.length > 0
+          ? `${players.length} athlete${players.length === 1 ? '' : 's'}. College, professional, and international — built for the next level.`
+          : 'Roster coming soon.'}
       </p>
     </div>
   </section>
@@ -116,45 +50,57 @@ const players = [
     </div>
   </nav>
 
-  <!-- Roster -->
-  <section class="roster-section">
-    <div class="container">
-      <div class="roster-header reveal">
-        <div class="roster-meta">
-          <p class="eyebrow">Current Roster</p>
-          <h2 class="section-title">THE SQUAD</h2>
+  {players.length > 0 ? (
+    <!-- Roster -->
+    <section class="roster-section">
+      <div class="container">
+        <div class="roster-header reveal">
+          <div class="roster-meta">
+            <p class="eyebrow">Current Roster</p>
+            <h2 class="section-title">THE SQUAD</h2>
+          </div>
+          <div class="roster-count">
+            <span class="count-num">{players.length}</span>
+            <span class="count-label">Athletes</span>
+          </div>
         </div>
-        <div class="roster-count">
-          <span class="count-num">{players.length}</span>
-          <span class="count-label">Athletes</span>
-        </div>
-      </div>
 
-      <div class="player-grid">
-        {players.map((player, i) => (
-          <div class="player-card reveal" style={`--delay:${(i % 4) * 0.08}s`}>
-            <div class="card-accent-line" aria-hidden="true"></div>
-            <div class="card-number">{String(i + 1).padStart(2, '0')}</div>
-            <div class="card-body">
-              <div class="player-meta">
-                <span class="player-position">{player.position}</span>
-                <span class="player-height">{player.height}</span>
-              </div>
-              <h3 class="player-name">{player.name}</h3>
-              <div class="player-school-row">
-                <span class="player-school">{player.school}</span>
-                {player.note && (
-                  <span class={`player-badge ${player.note === 'Needs Waiver' ? 'badge-warning' : player.note === 'Transfer Portal' ? 'badge-portal' : 'badge-info'}`}>
-                    {player.note}
+        <div class="player-grid">
+          {players.map((player, i) => (
+            <div class="player-card reveal" style={`--delay:${(i % 4) * 0.08}s`}>
+              <div class="card-accent-line" aria-hidden="true"></div>
+              <div class="card-number">{String(i + 1).padStart(2, '0')}</div>
+              <div class="card-body">
+                <div class="player-meta">
+                  {player.position && (
+                    <span class="player-position">{player.position}</span>
+                  )}
+                  {player.height && (
+                    <span class="player-height">{player.height}</span>
+                  )}
+                </div>
+                <h3 class="player-name">{player.name}</h3>
+                <div class="player-school-row">
+                  {player.school && (
+                    <span class="player-school">{player.school}</span>
+                  )}
+                  <span class={`player-badge ${player.availability === 'signed' ? 'badge-signed' : 'badge-available'}`}>
+                    {player.availability === 'signed' ? 'Signed' : 'Available'}
                   </span>
-                )}
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
-    </div>
-  </section>
+    </section>
+  ) : (
+    <section class="empty-section">
+      <div class="container">
+        <p class="empty-msg">Roster being updated — check back soon.</p>
+      </div>
+    </section>
+  )}
 
   <!-- CTA -->
   <section class="cta-section">
@@ -370,20 +316,26 @@ const players = [
     font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase;
     padding: 3px 8px;
   }
-  .badge-warning {
-    background: rgba(234,179,8,0.15);
-    color: #eab308;
-    border: 1px solid rgba(234,179,8,0.3);
+  .badge-available {
+    background: rgba(34,197,94,0.12);
+    color: #22c55e;
+    border: 1px solid rgba(34,197,94,0.3);
   }
-  .badge-portal {
-    background: rgba(168,85,247,0.15);
-    color: #a855f7;
-    border: 1px solid rgba(168,85,247,0.3);
-  }
-  .badge-info {
+  .badge-signed {
     background: rgba(168,189,208,0.1);
-    color: rgba(168,189,208,0.7);
+    color: rgba(168,189,208,0.6);
     border: 1px solid rgba(168,189,208,0.2);
+  }
+
+  /* ── Empty state ── */
+  .empty-section {
+    padding: 80px 0;
+    background-color: var(--color-bg);
+  }
+  .empty-msg {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px; color: rgba(168,189,208,0.45);
+    text-align: center;
   }
 
   /* ── CTA ── */

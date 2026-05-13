@@ -15,7 +15,7 @@ async function uniqueSlug(name) {
   }
 }
 
-export async function insertAthlete({ name, school, position, classYear, imageUrl, availability = 'available' }) {
+export async function insertAthlete({ name, school, position, classYear, imageUrl, availability = 'available', height = null }) {
   const slug = await uniqueSlug(name)
   const { data, error } = await db
     .from('athletes')
@@ -28,6 +28,7 @@ export async function insertAthlete({ name, school, position, classYear, imageUr
       sport: 'basketball',
       status: 'nil_client',
       availability,
+      height: height || null,
       photo_url: imageUrl || null,
       published: true,
       featured: false
@@ -39,10 +40,61 @@ export async function insertAthlete({ name, school, position, classYear, imageUr
   return data
 }
 
+export async function upsertRoster(rows) {
+  const results = { added: [], updated: [], failed: [] }
+
+  for (const row of rows) {
+    try {
+      const existing = await searchAthlete(row.name)
+      const exact = existing.find(p => p.name.toLowerCase() === row.name.toLowerCase())
+
+      if (exact) {
+        const { error } = await db
+          .from('athletes')
+          .update({
+            position: row.position.toUpperCase(),
+            school: row.school,
+            availability: row.availability,
+            ...(row.height ? { height: row.height } : {}),
+            published: true,
+          })
+          .eq('id', exact.id)
+
+        if (error) throw error
+        results.updated.push(row.name)
+      } else {
+        const slug = await uniqueSlug(row.name)
+        const { error } = await db
+          .from('athletes')
+          .insert({
+            slug,
+            name: row.name,
+            school: row.school,
+            position: row.position.toUpperCase(),
+            class_year: null,
+            sport: 'basketball',
+            status: 'nil_client',
+            availability: row.availability,
+            height: row.height || null,
+            published: true,
+            featured: false,
+          })
+
+        if (error) throw error
+        results.added.push(row.name)
+      }
+    } catch (err) {
+      results.failed.push({ name: row.name, reason: err.message })
+    }
+  }
+
+  return results
+}
+
 export async function listAthletes(school = null) {
   let query = db
     .from('athletes')
-    .select('name, school, position, class_year, featured, published, availability')
+    .select('name, school, position, class_year, height, featured, published, availability')
     .order('name')
 
   if (school) {
@@ -103,6 +155,7 @@ const UPDATABLE_FIELDS = {
   status: 'status',
   name: 'name',
   availability: 'availability',
+  height: 'height',
 }
 
 export async function updateAthlete(name, field, value) {
