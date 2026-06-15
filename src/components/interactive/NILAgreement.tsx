@@ -274,27 +274,42 @@ export default function NILAgreement() {
     setView(data.status === 'signed' ? 'athlete-signed' : 'athlete-view')
   }
 
-  function handlePinSubmit(e: React.FormEvent) {
+  async function handlePinSubmit(e: React.FormEvent) {
     e.preventDefault()
-    const adminPin = import.meta.env.PUBLIC_ADMIN_PIN
-    if (!adminPin) { setPinError(true); return }
-    if (pin === adminPin) { setView('admin-form'); setPinError(false) }
-    else setPinError(true)
+    if (!pin) { setPinError(true); return }
+    // PIN is validated server-side when the admin form is submitted
+    setView('admin-form')
+    setPinError(false)
   }
 
   async function handleAdminSubmit(e: React.FormEvent) {
     e.preventDefault()
     setSubmittingAdmin(true)
     setAdminError('')
-    const { data, error } = await supabase
-      .from('nil_agreements')
-      .insert({ athlete_name: adminForm.athleteName, effective_date: adminForm.effectiveDate, term_years: parseInt(adminForm.termYears) })
-      .select('agreement_url_token')
-      .single()
+    try {
+      const res = await fetch('/api/create-agreement', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          pin,
+          athleteName:   adminForm.athleteName,
+          effectiveDate: adminForm.effectiveDate,
+          termYears:     parseInt(adminForm.termYears),
+        }),
+      })
+      const json = await res.json()
+      if (!res.ok || !json.token) {
+        setAdminError(res.status === 401 ? 'Incorrect PIN.' : 'Failed to create agreement. Please try again.')
+        if (res.status === 401) setView('admin-pin')
+        setSubmittingAdmin(false)
+        return
+      }
+      setSigningLink(`${window.location.origin}/nil-agreement?token=${json.token}`)
+      setView('admin-link')
+    } catch {
+      setAdminError('Network error. Please try again.')
+    }
     setSubmittingAdmin(false)
-    if (error || !data) { setAdminError('Failed to create agreement. Please try again.'); return }
-    setSigningLink(`${window.location.origin}/nil-agreement?token=${data.agreement_url_token}`)
-    setView('admin-link')
   }
 
   // ── Canvas helpers ──
@@ -405,10 +420,20 @@ export default function NILAgreement() {
     }
 
     try {
+      let pdfBase64: string | null = null
+      const jspdf = (window as any).jspdf
+      if (jspdf && athleteEmail) {
+        pdfBase64 = buildPDFBase64(jspdf, agreement!, canvasRef.current)
+      }
       await fetch('/api/send-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ athleteName: agreement!.athlete_name, signedAt: new Date().toISOString(), athleteEmail: athleteEmail || null }),
+        body: JSON.stringify({
+          athleteName:  agreement!.athlete_name,
+          signedAt:     new Date().toISOString(),
+          athleteEmail: athleteEmail || null,
+          pdfBase64,
+        }),
       })
     } catch {}
 
@@ -418,14 +443,9 @@ export default function NILAgreement() {
   }
 
   // ── PDF generation ──
-  function generatePDF() {
-    const jspdf = (window as any).jspdf
-    if (!jspdf) {
-      window.print()
-      return
-    }
+  function buildPDFBase64(jspdf: any, row: AgreementRow, canvas: HTMLCanvasElement | null): string {
     const { jsPDF } = jspdf
-    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
+    const doc    = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
     const W      = doc.internal.pageSize.getWidth()
     const margin = 20
     const maxW   = W - margin * 2
@@ -441,13 +461,13 @@ export default function NILAgreement() {
     doc.setFontSize(9)
     doc.text('Hyche International Management Sports Group', W / 2, y, { align: 'center' })
     y += 5
-    doc.text(`Athlete: ${agreement!.athlete_name}   |   Agent: Christopher Hyche   |   Date: ${fmtDate(agreement!.effective_date)}`, W / 2, y, { align: 'center' })
+    doc.text(`Athlete: ${row.athlete_name}   |   Agent: Christopher Hyche   |   Date: ${fmtDate(row.effective_date)}`, W / 2, y, { align: 'center' })
     y += 5
     doc.setDrawColor(26, 114, 232)
     doc.line(margin, y, W - margin, y)
     y += 7
 
-    for (const s of getAgreementSections(agreement!.athlete_name, agreement!.effective_date, agreement!.term_years)) {
+    for (const s of getAgreementSections(row.athlete_name, row.effective_date, row.term_years)) {
       doc.setFont('helvetica', 'bold')
       doc.setFontSize(9.5)
       const tLines = doc.splitTextToSize(s.title, maxW)
@@ -472,20 +492,31 @@ export default function NILAgreement() {
     doc.text('SIGNATURES', margin, y)
     y += 8
 
-    if (canvasRef.current) {
-      const sigImg = canvasRef.current.toDataURL('image/png')
+    if (canvas) {
+      const sigImg = canvas.toDataURL('image/png')
       doc.addImage(sigImg, 'PNG', margin, y, 80, 24)
       y += 28
     }
     doc.setFont('helvetica', 'normal')
     doc.setFontSize(8)
-    doc.text(`${agreement!.athlete_name} — Athlete`, margin, y)
+    doc.text(`${row.athlete_name} — Athlete`, margin, y)
     y += 5
     doc.text(`Signed: ${new Date().toLocaleString('en-US', { timeZone: 'America/Chicago' })} CST`, margin, y)
     y += 5
     doc.text('Christopher Hyche — Agent, Hyche International Management Sports Group', margin, y)
 
-    doc.save(`NIL-Agreement-${agreement!.athlete_name.replace(/\s+/g, '-')}.pdf`)
+    // Return base64 string (strip the data URI prefix that jsPDF uses internally)
+    return doc.output('datauristring').split(',')[1]
+  }
+
+  function generatePDF() {
+    const jspdf = (window as any).jspdf
+    if (!jspdf) { window.print(); return }
+    const base64 = buildPDFBase64(jspdf, agreement!, canvasRef.current)
+    const link   = document.createElement('a')
+    link.href     = `data:application/pdf;base64,${base64}`
+    link.download = `NIL-Agreement-${agreement!.athlete_name.replace(/\s+/g, '-')}.pdf`
+    link.click()
   }
 
   // ═════════════════════════════════════════════════════════════════════════════
