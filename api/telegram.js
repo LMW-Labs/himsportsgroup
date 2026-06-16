@@ -46,11 +46,22 @@ async function clearSession(chatId) {
 
 // ── Parse player message ──────────────────────────────────────────────────
 function parsePlayerMessage(text) {
-  const match = text.match(/add\s+player\s*:\s*(.+)/i)
+  // Strip leading slash, accept with or without colon, flexible spacing
+  const match = text.match(/^\/?add\s+player\s*:?\s*(.+)/i)
   if (!match) return null
-  const parts = match[1].split(',').map(s => s.trim()).filter(Boolean)
-  if (parts.length < 4) return null
-  return { name: parts[0], school: parts[1], position: parts[2].toUpperCase(), classYear: parts[3] }
+  // Split on comma or pipe or semicolon
+  const parts = match[1].split(/[,|;]/).map(s => s.trim()).filter(Boolean)
+  if (parts.length < 2) return null
+  return {
+    name: parts[0],
+    school: parts[1] || '',
+    position: (parts[2] || '').toUpperCase() || 'N/A',
+    classYear: parts[3] || 'N/A'
+  }
+}
+
+function isAddPlayerCommand(text) {
+  return /^\/?add\s+player/i.test(text)
 }
 
 // ── Image search ──────────────────────────────────────────────────────────
@@ -161,10 +172,10 @@ bot.on('text', async (ctx) => {
   const session = await getSession(chatId)
   const step = session?.step ?? 'idle'
 
-  if (/^add\s+player\s*:/i.test(text)) {
+  if (isAddPlayerCommand(text)) {
     const parsed = parsePlayerMessage(text)
     if (!parsed) {
-      await ctx.reply('Please use the format:\n`Add player: Name, School, Position, Class Year`\n\nExample:\n`Add player: Marcus Johnson, Westview High School, SG, 2026`', { parse_mode: 'Markdown' })
+      await ctx.reply('Just need at least a name and school. Try:\n`Add player: Trey Alexander, Holmes CC, PG, 2025`', { parse_mode: 'Markdown' })
       return
     }
     await startAddFlow(ctx, parsed)
@@ -211,7 +222,7 @@ bot.on('text', async (ctx) => {
 
   if (step === 'await_upload') { await ctx.reply('Please upload a photo (send an image file).'); return }
 
-  await ctx.reply('Send `Add player: Name, School, Position, Class Year` to add a player.\n\nExample:\n`Add player: Marcus Johnson, Westview High School, SG, 2026`', { parse_mode: 'Markdown' })
+  await ctx.reply('To add a player, send:\n`Add player: Name, School, Position, Class Year`\n\nPosition and class year are optional. Example:\n`Add player: Trey Alexander, Holmes CC, PG, 2025`', { parse_mode: 'Markdown' })
 })
 
 bot.on('photo', async (ctx) => {
