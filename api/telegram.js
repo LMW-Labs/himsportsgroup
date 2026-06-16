@@ -63,9 +63,10 @@ async function searchImages(playerName, school) {
     url.searchParams.set('searchType', 'image')
     url.searchParams.set('num', '3')
     const res = await fetch(url.toString())
-    if (!res.ok) { console.error('Image search failed:', res.status, await res.text()); return [] }
-    const data = await res.json()
-    return (data.items || []).map(item => item.link)
+    const body = await res.json()
+    if (!res.ok) { console.error('Image search failed:', res.status, JSON.stringify(body)); return [] }
+    console.log('Image search results:', body.items?.length ?? 0, 'items', body.error ? JSON.stringify(body.error) : '')
+    return (body.items || []).map(item => item.link)
   } catch (err) {
     console.error('Image search error:', err.message)
     return []
