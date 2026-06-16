@@ -1,92 +1,21 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro'
+import PublicLayout from '../layouts/PublicLayout.astro'
+import SplashScreen from '../components/interactive/SplashScreen'
+import HeroSection from '../components/interactive/HeroSection'
+import PillarCards from '../components/interactive/PillarCards'
+import FounderStrip from '../components/interactive/FounderStrip'
+import ServicesSection from '../components/interactive/ServicesSection'
+import StatsBar from '../components/interactive/StatsBar'
 ---
 
-<BaseLayout
-  title="Hyche International Management Sports Group"
-  description="NIL deal negotiation, contract representation, and brand architecture for the next generation of athletes. Based in Jackson, MS."
+<PublicLayout
+  title="Hyche International Management Sports Group | NIL & Athlete Representation"
+  description="Boutique NIL and athlete representation agency founded by former Harlem Globetrotter Chris Hyche. Based in Jackson, Mississippi. Serving college and professional athletes nationwide."
 >
-
-<style>
-  body {
-    position: relative;
-    min-height: 100dvh;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .watermark {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    pointer-events: none;
-    user-select: none;
-  }
-
-  .watermark img {
-    width: clamp(280px, 65vw, 900px);
-    opacity: 0.15;
-    mix-blend-mode: screen;
-  }
-
-  @media (max-width: 640px) {
-    .watermark img { width: 85vw; }
-  }
-
-  .content {
-    position: relative;
-    z-index: 10;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    gap: 16px;
-    padding: 0 24px;
-  }
-
-  .headline {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(4rem, 14vw, 11rem);
-    line-height: 0.9;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    background: linear-gradient(
-      180deg,
-      #FFFFFF 0%, #EAF4FF 8%, #C4DCEE 20%,
-      #82AACC 35%, #4A7898 50%, #285878 62%,
-      #4A7898 75%, #90B8D4 88%, #C8E0F4 100%
-    );
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    filter: drop-shadow(0 0 32px rgba(200,80,16,0.75))
-            drop-shadow(0 0 64px rgba(200,80,16,0.4))
-            drop-shadow(0 2px 4px rgba(0,0,0,0.9));
-  }
-
-  .tagline {
-    font-family: 'Rajdhani', sans-serif;
-    font-weight: 600;
-    font-size: clamp(1.125rem, 2.5vw, 1.5rem);
-    letter-spacing: 0.35em;
-    color: rgba(168,189,208,0.65);
-    text-transform: uppercase;
-  }
-</style>
-
-<!-- Logo watermark -->
-<div class="watermark">
-  <img src="/logo.png" alt="" aria-hidden="true" />
-</div>
-
-<!-- Foreground text -->
-<div class="content">
-  <h1 class="headline">Coming Soon</h1>
-  <p class="tagline">Your Name. Your Brand. Your Future.</p>
-</div>
-
-</BaseLayout>
+  <SplashScreen client:load />
+  <HeroSection client:load />
+  <PillarCards client:load />
+  <FounderStrip client:load />
+  <ServicesSection client:load />
+  <StatsBar client:load />
+</PublicLayout>
