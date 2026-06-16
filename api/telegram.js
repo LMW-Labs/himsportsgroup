@@ -1,24 +1,10 @@
 import { Telegraf } from 'telegraf'
 import { createClient } from '@supabase/supabase-js'
-import { GoogleAuth } from 'google-auth-library'
-
 // ── Supabase admin client ──────────────────────────────────────────────────
 const db = createClient(
   process.env.PUBLIC_SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
 )
-
-// ── Google auth ───────────────────────────────────────────────────────────
-let _auth
-function getAuth() {
-  if (!_auth) {
-    _auth = new GoogleAuth({
-      credentials: JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_JSON),
-      scopes: ['https://www.googleapis.com/auth/cloud-platform']
-    })
-  }
-  return _auth
-}
 
 // ── Bot ───────────────────────────────────────────────────────────────────
 const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN)
@@ -67,15 +53,17 @@ function isAddPlayerCommand(text) {
 // ── Image search ──────────────────────────────────────────────────────────
 async function searchImages(playerName, school) {
   try {
-    const client = await getAuth().getClient()
-    const { token } = await client.getAccessToken()
+    const apiKey = process.env.GOOGLE_API_KEY
+    const cseId = process.env.GOOGLE_CSE_ID
+    if (!apiKey || !cseId) { console.error('Missing GOOGLE_API_KEY or GOOGLE_CSE_ID'); return [] }
     const url = new URL('https://www.googleapis.com/customsearch/v1')
-    url.searchParams.set('cx', process.env.GOOGLE_CSE_ID)
+    url.searchParams.set('key', apiKey)
+    url.searchParams.set('cx', cseId)
     url.searchParams.set('q', `${playerName} ${school} basketball player`)
     url.searchParams.set('searchType', 'image')
-    url.searchParams.set('num', '2')
-    const res = await fetch(url.toString(), { headers: { Authorization: `Bearer ${token}` } })
-    if (!res.ok) { console.error('Image search failed:', res.status); return [] }
+    url.searchParams.set('num', '3')
+    const res = await fetch(url.toString())
+    if (!res.ok) { console.error('Image search failed:', res.status, await res.text()); return [] }
     const data = await res.json()
     return (data.items || []).map(item => item.link)
   } catch (err) {
