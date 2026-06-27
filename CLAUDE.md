@@ -67,8 +67,7 @@ RESEND_API_KEY              — Resend API key for transactional email
 ## Pre-Launch Checklist
 1. Replace `src/pages/index.astro` with staging content (remove `noindex`)
 2. Add `gc-logo.png` to `/public/` (Nav falls back to text currently)
-3. Fill real phone number in `src/pages/contact.astro` (two `(XXX) XXX-XXXX` placeholders)
-4. Align stats across: HeroSection.tsx (5 athletes), contact.astro sidebar (50+), athletes/nil.astro ($12M+)
+3. Align stats across: HeroSection.tsx (5 athletes), contact.astro sidebar (50+), athletes/nil.astro ($12M+)
 
 ## NIL Agreement Flow
 - No token in URL → admin PIN view → admin form → Supabase insert via `/api/create-agreement` → copy signing link

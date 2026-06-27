@@ -128,7 +128,7 @@ function SubmitBtn({ status }: { status: SubmitStatus }) {
 function AthleteForm({ onSuccess }: { onSuccess: () => void }) {
   const [status, setStatus] = useState<SubmitStatus>('idle')
   const [errors, setErrors] = useState<Record<string, string>>({})
-  const [vals, setVals] = useState({ first_name: '', last_name: '', email: '', phone: '', sport: '', school: '', class_year: '', message: '' })
+  const [vals, setVals] = useState({ first_name: '', last_name: '', email: '', sport: '', school: '', class_year: '', message: '' })
 
   const set = (k: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
     setVals(v => ({ ...v, [k]: e.target.value }))
@@ -149,7 +149,7 @@ function AthleteForm({ onSuccess }: { onSuccess: () => void }) {
 
     setStatus('loading')
     const name = `${vals.first_name} ${vals.last_name}`
-    const message = `Sport: ${vals.sport}\nSchool: ${vals.school}\nClass: ${vals.class_year}${vals.phone ? `\nPhone: ${vals.phone}` : ''}\n\n${vals.message}`
+    const message = `Sport: ${vals.sport}\nSchool: ${vals.school}\nClass: ${vals.class_year}\n\n${vals.message}`
     const { error } = await supabase.from('inquiries').insert({ name, email: vals.email, type: 'athlete', message })
     if (error) {
       setStatus('error')
@@ -166,10 +166,7 @@ function AthleteForm({ onSuccess }: { onSuccess: () => void }) {
         <Field label="First Name" error={errors.first_name}><Input placeholder="Marcus" value={vals.first_name} onChange={set('first_name')} /></Field>
         <Field label="Last Name" error={errors.last_name}><Input placeholder="Johnson" value={vals.last_name} onChange={set('last_name')} /></Field>
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-        <Field label="Email" error={errors.email}><Input type="email" placeholder="your@email.com" value={vals.email} onChange={set('email')} /></Field>
-        <Field label="Phone (optional)"><Input type="tel" placeholder="+1 (555) 000-0000" value={vals.phone} onChange={set('phone')} /></Field>
-      </div>
+      <Field label="Email" error={errors.email}><Input type="email" placeholder="your@email.com" value={vals.email} onChange={set('email')} /></Field>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
         <Field label="Sport" error={errors.sport}>
           <Select value={vals.sport} onChange={set('sport')}>
