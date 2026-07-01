@@ -2,92 +2,17 @@
 import PublicLayout from '../../layouts/PublicLayout.astro'
 
 const players = [
-  {
-    name: 'Halvine Dzellat',
-    height: "6'10",
-    position: 'F/C',
-    school: 'Cincinnati',
-    note: 'Transfer Portal',
-    origin: null,
-  },
-  {
-    name: 'Akram Naji',
-    height: "6'4",
-    position: 'PG',
-    school: 'France',
-    note: null,
-    origin: 'France',
-  },
-  {
-    name: 'Aurele Brena',
-    height: "6'3",
-    position: 'PG',
-    school: 'France',
-    note: null,
-    origin: 'France',
-  },
-  {
-    name: 'Bissokot Aristote',
-    height: "6'9",
-    position: 'SF/PF',
-    school: 'Austria',
-    note: null,
-    origin: 'Austria',
-  },
-  {
-    name: 'Dontavius King',
-    height: "6'8",
-    position: 'PF',
-    school: 'Midway University',
-    note: 'NAIA',
-    origin: null,
-  },
-  {
-    name: 'Trey Alexander',
-    height: "6'1",
-    position: 'PG',
-    school: 'Holmes CC',
-    note: null,
-    origin: null,
-  },
-  {
-    name: 'Sasa Lazic',
-    height: "6'8",
-    position: 'PF',
-    school: 'Greece',
-    note: null,
-    origin: 'Greece',
-  },
-  {
-    name: 'Jakub Solden',
-    height: "6'9",
-    position: 'PF',
-    school: 'Finland',
-    note: null,
-    origin: 'Finland',
-  },
-  {
-    name: 'Christian Blomfelt',
-    height: "6'6",
-    position: 'SG/SF',
-    school: 'Finland',
-    note: null,
-    origin: 'Finland',
-  },
-  {
-    name: 'Brentay Noel',
-    height: "6'10",
-    position: 'PF/C',
-    school: 'ULM',
-    note: 'Needs Waiver',
-    origin: null,
-  },
+  { name: 'Tyler Husband', position: 'PF' },
+  { name: 'Cam Myers', position: null },
+  { name: 'Marcus Smith', position: 'PG' },
+  { name: 'Filip Stancevic', position: 'PF' },
+  { name: 'Trey Alexander', position: 'PG' },
 ]
 ---
 
 <PublicLayout
   title="Basketball Roster | Hyche International Management Sports Group"
-  description="Hyche International Management Sports Group basketball roster — 10 elite players from college, professional leagues, and international programs worldwide."
+  description="Hyche International Management Sports Group basketball roster — elite players signed for representation."
 >
 
   <!-- Hero -->
@@ -100,7 +25,7 @@ const players = [
         <span class="split-outline">ROSTER</span>
       </div>
       <p class="hero-body">
-        {players.length} athletes. College, professional, and international&nbsp;—&nbsp;built for the next level.
+        {players.length} athletes signed and ready for the next level.
       </p>
     </div>
   </section>
@@ -135,20 +60,19 @@ const players = [
           <div class="player-card reveal" style={`--delay:${(i % 4) * 0.08}s`}>
             <div class="card-accent-line" aria-hidden="true"></div>
             <div class="card-number">{String(i + 1).padStart(2, '0')}</div>
+            <div class="player-photo" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+            </div>
             <div class="card-body">
-              <div class="player-meta">
-                <span class="player-position">{player.position}</span>
-                <span class="player-height">{player.height}</span>
-              </div>
+              {player.position && (
+                <div class="player-meta">
+                  <span class="player-position">{player.position}</span>
+                </div>
+              )}
               <h3 class="player-name">{player.name}</h3>
-              <div class="player-school-row">
-                <span class="player-school">{player.school}</span>
-                {player.note && (
-                  <span class={`player-badge ${player.note === 'Needs Waiver' ? 'badge-warning' : player.note === 'Transfer Portal' ? 'badge-portal' : 'badge-info'}`}>
-                    {player.note}
-                  </span>
-                )}
-              </div>
             </div>
           </div>
         ))}
@@ -332,6 +256,16 @@ const players = [
     color: rgba(200,80,16,0.35);
     margin-bottom: 20px;
   }
+  .player-photo {
+    width: 88px; height: 88px;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(168,189,208,0.06);
+    border: 1px solid rgba(168,189,208,0.14);
+    border-radius: 50%;
+    color: rgba(168,189,208,0.35);
+    margin-bottom: 20px;
+  }
+  .player-photo svg { width: 40px; height: 40px; }
   .card-body { display: flex; flex-direction: column; gap: 8px; }
   .player-meta {
     display: flex; align-items: center; gap: 12px;
@@ -345,45 +279,11 @@ const players = [
     border: 1px solid rgba(26,114,232,0.25);
     padding: 3px 9px;
   }
-  .player-height {
-    font-family: 'Rajdhani', sans-serif; font-weight: 600;
-    font-size: 13px; letter-spacing: 0.08em;
-    color: rgba(168,189,208,0.55);
-  }
   .player-name {
     font-family: 'Bebas Neue', sans-serif;
     font-size: clamp(26px, 3vw, 36px);
     line-height: 0.95; letter-spacing: 0.02em;
     color: var(--color-chrome);
-  }
-  .player-school-row {
-    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
-    margin-top: 4px;
-  }
-  .player-school {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13.5px;
-    color: rgba(168,189,208,0.65);
-  }
-  .player-badge {
-    font-family: 'Rajdhani', sans-serif; font-weight: 700;
-    font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase;
-    padding: 3px 8px;
-  }
-  .badge-warning {
-    background: rgba(234,179,8,0.15);
-    color: #eab308;
-    border: 1px solid rgba(234,179,8,0.3);
-  }
-  .badge-portal {
-    background: rgba(168,85,247,0.15);
-    color: #a855f7;
-    border: 1px solid rgba(168,85,247,0.3);
-  }
-  .badge-info {
-    background: rgba(168,189,208,0.1);
-    color: rgba(168,189,208,0.7);
-    border: 1px solid rgba(168,189,208,0.2);
   }
 
   /* ── CTA ── */
