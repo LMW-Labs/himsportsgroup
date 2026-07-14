@@ -7,11 +7,15 @@ const db = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 )
 
+// Canonical public site origin for building athlete-facing links (no window on
+// the server). Override with PUBLIC_SITE_URL in Vercel if the domain changes.
+const SITE_URL = (process.env.PUBLIC_SITE_URL || 'https://himsportsgroup.com').replace(/\/$/, '')
+
 // ── Bot ───────────────────────────────────────────────────────────────────
 const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN)
 
-function log(action, playerName) {
-  console.log(JSON.stringify({ ts: new Date().toISOString(), action, player: playerName ?? null }))
+function log(action, flow, subject) {
+  console.log(JSON.stringify({ ts: new Date().toISOString(), action, flow: flow ?? null, subject: subject ?? null }))
 }
 
 // ── Session helpers ───────────────────────────────────────────────────────
@@ -32,34 +36,17 @@ async function clearSession(chatId) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// FIELD DEFINITIONS — the complete record the bot must collect + validate
-// before an athlete can be published. Order here is the prompting order.
+// SHARED PARSERS / VALIDATORS
 // ═══════════════════════════════════════════════════════════════════════════
-const FIELDS = [
-  { key: 'photo',       label: 'profile photo',      prompt: 'Send the athlete\'s *profile photo* (as an image).' },
-  { key: 'name',        label: 'first + last name',  prompt: 'What\'s the athlete\'s *full name*? (first and last)' },
-  { key: 'school',      label: 'school',             prompt: 'What *school* do they attend?' },
-  { key: 'school_type', label: 'school type',        prompt: 'What *type* of school? Reply *prep*, *juco*, or *international*.' },
-  { key: 'position',    label: 'position',           prompt: 'What *position* do they play?' },
-  { key: 'height',      label: 'height',             prompt: 'What\'s their *height*? (e.g. `6\'2"`, `6 2`, or `74`)' },
-  { key: 'social',      label: 'social handle',      prompt: 'Their main *social handle with platform*? (e.g. `instagram @jdoe`)' },
-]
-const REQUIRED_KEYS = FIELDS.map(f => f.key)
-const fieldDef = key => FIELDS.find(f => f.key === key)
-
-// ── Validators / parsers ────────────────────────────────────────────────────
 
 // Height → integer inches (canonical). Accepts 6'2", 6'2, 6 2, 6ft2, 6 foot 2,
 // 6-2, or a bare inches number like 74. Returns null if it can't parse safely.
 function parseHeight(raw) {
   const s = String(raw).trim().toLowerCase()
-
-  // bare inches: "74"
   if (/^\d{2,3}$/.test(s)) {
     const n = parseInt(s, 10)
     return (n >= 48 && n <= 96) ? n : null
   }
-  // feet + inches in many separators: 6'2", 6'2, 6 2, 6ft2, 6 foot 2, 6-2
   const m = s.match(/^(\d)\s*(?:'|’|ft|foot|feet|-|\s)\s*(\d{1,2})?\s*(?:"|”|''|in|inch|inches)?$/)
   if (m) {
     const ft = parseInt(m[1], 10)
@@ -68,7 +55,6 @@ function parseHeight(raw) {
     const total = ft * 12 + inch
     return (total >= 48 && total <= 96) ? total : null
   }
-  // feet only: "6'" or "6 ft"
   const mf = s.match(/^(\d)\s*(?:'|’|ft|foot|feet)$/)
   if (mf) {
     const total = parseInt(mf[1], 10) * 12
@@ -94,7 +80,6 @@ function parseSchoolType(raw) {
   return null
 }
 
-// social handle + platform → { platform, handle } mapped to a real DB column
 const PLATFORM_MAP = {
   instagram: 'instagram', ig: 'instagram', insta: 'instagram',
   twitter: 'twitter', x: 'twitter',
@@ -102,13 +87,11 @@ const PLATFORM_MAP = {
 }
 function parseSocial(raw) {
   const s = String(raw).trim()
-  // "instagram @jdoe" | "ig: jdoe" | "x @jdoe" | "tiktok jdoe"
   const m = s.match(/^([a-z]+)\s*[:\s]\s*@?([A-Za-z0-9._]+)$/i)
   if (m) {
     const platform = PLATFORM_MAP[m[1].toLowerCase()]
     if (platform) return { platform, handle: m[2].replace(/^@/, '') }
   }
-  // bare "@jdoe" with no platform is not enough — platform is required
   return null
 }
 
@@ -123,129 +106,72 @@ function parseName(raw) {
   }
 }
 
-// ── State-machine core ──────────────────────────────────────────────────────
-
-// Which required field (in order) is still neither filled nor intentionally omitted?
-function nextMissing(pd, omitted) {
-  const done = new Set(omitted || [])
-  for (const key of REQUIRED_KEYS) {
-    if (done.has(key)) continue
-    if (key === 'photo'  && pd.photo_url)     continue
-    if (key === 'name'   && pd.name)          continue
-    if (key === 'school' && pd.school)        continue
-    if (key === 'school_type' && pd.school_type) continue
-    if (key === 'position' && pd.position)    continue
-    if (key === 'height' && pd.height_inches != null) continue
-    if (key === 'social' && pd.social_handle) continue
-    return key
+// effective date → canonical YYYY-MM-DD. Accepts "today", ISO, MM/DD/YYYY,
+// or anything Date can parse (e.g. "Jan 5 2026"). Returns null if invalid.
+function parseDate(raw) {
+  const s = String(raw).trim().toLowerCase()
+  const iso = () => {
+    const d = new Date()
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
   }
-  return null
+  if (s === 'today' || s === 'now') return iso()
+  // Already ISO
+  let m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/)
+  if (m) {
+    const d = new Date(`${s}T00:00:00Z`)
+    return isNaN(d.getTime()) ? null : s
+  }
+  // MM/DD/YYYY or M/D/YY
+  m = s.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{2,4})$/)
+  if (m) {
+    let [, mm, dd, yy] = m
+    if (yy.length === 2) yy = '20' + yy
+    const month = parseInt(mm, 10), day = parseInt(dd, 10), year = parseInt(yy, 10)
+    if (month < 1 || month > 12 || day < 1 || day > 31) return null
+    const d = new Date(Date.UTC(year, month - 1, day))
+    if (isNaN(d.getTime())) return null
+    return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+  }
+  // Fallback: let Date try (e.g. "January 5, 2026")
+  const d = new Date(raw)
+  if (isNaN(d.getTime())) return null
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
-// Store a validated value for a field on the accumulating player_data.
-// Returns { ok, error } — error is a re-prompt hint if validation failed.
-function applyField(pd, key, text) {
-  switch (key) {
-    case 'name': {
-      const n = parseName(text)
-      if (!n) return { ok: false, error: 'I need *both* a first and last name. Try again (e.g. `Trey Alexander`).' }
-      Object.assign(pd, n)
-      return { ok: true }
-    }
-    case 'school':
-      pd.school = text.trim()
-      return { ok: true }
-    case 'school_type': {
-      const t = parseSchoolType(text)
-      if (!t) return { ok: false, error: 'Reply *prep*, *juco*, or *international*.' }
-      pd.school_type = t
-      return { ok: true }
-    }
-    case 'position':
-      pd.position = text.trim().toUpperCase()
-      return { ok: true }
-    case 'height': {
-      const inches = parseHeight(text)
-      if (inches == null) return { ok: false, error: 'Couldn\'t read that height. Try `6\'2"`, `6 2`, or inches like `74`.' }
-      pd.height_inches = inches
-      return { ok: true }
-    }
-    case 'social': {
-      const soc = parseSocial(text)
-      if (!soc) return { ok: false, error: 'I need the *platform and handle* together, e.g. `instagram @jdoe`, `x @jdoe`, or `tiktok @jdoe`.' }
-      pd.social_platform = soc.platform
-      pd.social_handle = soc.handle
-      return { ok: true }
-    }
-    default:
-      return { ok: false, error: 'Unknown field.' }
-  }
+function parseTermYears(raw) {
+  const s = String(raw).trim().match(/^(\d{1,2})/)
+  if (!s) return null
+  const n = parseInt(s[1], 10)
+  return (n >= 1 && n <= 10) ? n : null
 }
 
-// Ask for the next missing field, or move to the publish preview if complete.
-async function advance(ctx, chatId, pd, omitted) {
-  const next = nextMissing(pd, omitted)
-  if (!next) {
-    return sendPreview(ctx, chatId, pd, omitted)
-  }
-  await setSession(chatId, { step: 'collecting', awaiting: next, player_data: pd, omitted })
-  const f = fieldDef(next)
-  const hint = next === 'photo' ? '' : '\n\n_Reply_ *skip* _to intentionally leave this blank._'
-  await ctx.reply(`${f.prompt}${hint}`, { parse_mode: 'Markdown' })
-}
-
-// ── Photo storage ─────────────────────────────────────────────────────────
-async function storePhoto(telegramUrl, playerName) {
-  const slug = (playerName || 'athlete').toLowerCase().replace(/[^a-z0-9]+/g, '-')
+// ── Storage / slug helpers ──────────────────────────────────────────────────
+async function storePhoto(telegramUrl, subject, bucket) {
+  const slug = (subject || 'file').toLowerCase().replace(/[^a-z0-9]+/g, '-')
   const filename = `${slug}-${Date.now()}.jpg`
   const response = await fetch(telegramUrl)
   if (!response.ok) throw new Error(`Failed to fetch photo: ${response.status}`)
   const arrayBuffer = await response.arrayBuffer()
-  const { error } = await db.storage.from('athlete-photos').upload(filename, arrayBuffer, { contentType: 'image/jpeg', upsert: true })
+  const { error } = await db.storage.from(bucket).upload(filename, arrayBuffer, { contentType: 'image/jpeg', upsert: true })
   if (error) throw error
-  const { data: { publicUrl } } = db.storage.from('athlete-photos').getPublicUrl(filename)
+  const { data: { publicUrl } } = db.storage.from(bucket).getPublicUrl(filename)
   return publicUrl
 }
 
-// ── Athlete insert ────────────────────────────────────────────────────────
 function slugify(name) {
   return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
 }
 
-async function uniqueSlug(name) {
-  const base = slugify(name)
+async function uniqueSlug(table, name) {
+  const base = slugify(name) || 'item'
   let slug = base, i = 1
   for (;;) {
-    const { data } = await db.from('athletes').select('id').eq('slug', slug).maybeSingle()
+    const { data } = await db.from(table).select('id').eq('slug', slug).maybeSingle()
     if (!data) return slug
     slug = `${base}-${i++}`
   }
 }
 
-async function insertAthlete(pd) {
-  const slug = await uniqueSlug(pd.name)
-  const row = {
-    slug,
-    name: pd.name,
-    school: pd.school || null,
-    school_type: pd.school_type || null,
-    position: pd.position || null,
-    height_inches: pd.height_inches ?? null,
-    sport: 'basketball',
-    status: 'nil_client',
-    photo_url: pd.photo_url || null,
-    published: true,
-    featured: false,
-  }
-  // social handle lands in the platform-specific column the frontend renders
-  if (pd.social_platform && pd.social_handle) row[pd.social_platform] = pd.social_handle
-
-  const { data, error } = await db.from('athletes').insert(row).select().single()
-  if (error) throw error
-  return data
-}
-
-// ── Deploy trigger ────────────────────────────────────────────────────────
 async function triggerDeploy() {
   const hookUrl = process.env.VERCEL_DEPLOY_HOOK_URL
   if (!hookUrl) { console.warn('VERCEL_DEPLOY_HOOK_URL not set'); return }
@@ -253,47 +179,326 @@ async function triggerDeploy() {
   if (!res.ok) console.error('Deploy hook failed:', res.status)
 }
 
-// ── Publish preview ─────────────────────────────────────────────────────────
-function summarize(pd, omitted) {
-  const done = new Set(omitted || [])
-  const blank = '_(left blank)_'
-  const line = (label, key, val) => `*${label}:* ${done.has(key) ? blank : (val ?? blank)}`
-  const social = pd.social_handle ? `${pd.social_platform} @${pd.social_handle}` : null
-  return [
-    '📋 *Preview — review before publishing:*',
-    '',
-    line('Name', 'name', pd.name),
-    line('School', 'school', pd.school),
-    line('School type', 'school_type', pd.school_type),
-    line('Position', 'position', pd.position),
-    line('Height', 'height', formatHeight(pd.height_inches)),
-    line('Social', 'social', social),
-    line('Photo', 'photo', pd.photo_url ? 'attached' : null),
-  ].join('\n')
+// ═══════════════════════════════════════════════════════════════════════════
+// FLOW REGISTRY
+// Each flow is a self-contained spec the shared state machine drives:
+//   fields    — prompting order; type 'photo' collected via image, else text
+//   isFilled  — has this field been satisfied on the accumulator (pd)?
+//   apply     — validate + store a text value → { ok, error }
+//   photoKey  — which field (if any) is the photo; how to store the URL
+//   summarize — preview lines
+//   finalize  — persist + side effects; returns the success reply string
+// ═══════════════════════════════════════════════════════════════════════════
+
+const SKIP_HINT = '\n\n_Reply_ *skip* _to intentionally leave this blank._'
+
+// ── ROSTER (athlete intake) — behavior preserved from the prior bot ─────────
+const rosterFlow = {
+  name: 'roster',
+  intro: "Let's build a complete athlete record. I'll ask for each field.",
+  photoKey: 'photo',
+  fields: [
+    { key: 'photo',       label: 'profile photo', type: 'photo', skippable: true, prompt: "Send the athlete's *profile photo* (as an image)." },
+    { key: 'name',        label: 'first + last name', skippable: true, prompt: "What's the athlete's *full name*? (first and last)" },
+    { key: 'school',      label: 'school', skippable: true, prompt: 'What *school* do they attend?' },
+    { key: 'school_type', label: 'school type', skippable: true, prompt: 'What *type* of school? Reply *prep*, *juco*, or *international*.' },
+    { key: 'position',    label: 'position', skippable: true, prompt: 'What *position* do they play?' },
+    { key: 'height',      label: 'height', skippable: true, prompt: "What's their *height*? (e.g. `6'2\"`, `6 2`, or `74`)" },
+    { key: 'social',      label: 'social handle', skippable: true, prompt: 'Their main *social handle with platform*? (e.g. `instagram @jdoe`)' },
+  ],
+  isFilled(pd, key) {
+    switch (key) {
+      case 'photo':       return !!pd.photo_url
+      case 'name':        return !!pd.name
+      case 'school':      return !!pd.school
+      case 'school_type': return !!pd.school_type
+      case 'position':    return !!pd.position
+      case 'height':      return pd.height_inches != null
+      case 'social':      return !!pd.social_handle
+      default:            return false
+    }
+  },
+  storePhoto(pd, url) { pd.photo_url = url },
+  apply(pd, key, text) {
+    switch (key) {
+      case 'name': {
+        const n = parseName(text)
+        if (!n) return { ok: false, error: 'I need *both* a first and last name. Try again (e.g. `Trey Alexander`).' }
+        Object.assign(pd, n); return { ok: true }
+      }
+      case 'school': pd.school = text.trim(); return { ok: true }
+      case 'school_type': {
+        const t = parseSchoolType(text)
+        if (!t) return { ok: false, error: 'Reply *prep*, *juco*, or *international*.' }
+        pd.school_type = t; return { ok: true }
+      }
+      case 'position': pd.position = text.trim().toUpperCase(); return { ok: true }
+      case 'height': {
+        const inches = parseHeight(text)
+        if (inches == null) return { ok: false, error: 'Couldn\'t read that height. Try `6\'2"`, `6 2`, or inches like `74`.' }
+        pd.height_inches = inches; return { ok: true }
+      }
+      case 'social': {
+        const soc = parseSocial(text)
+        if (!soc) return { ok: false, error: 'I need the *platform and handle* together, e.g. `instagram @jdoe`, `x @jdoe`, or `tiktok @jdoe`.' }
+        pd.social_platform = soc.platform; pd.social_handle = soc.handle; return { ok: true }
+      }
+      default: return { ok: false, error: 'Unknown field.' }
+    }
+  },
+  summarize(pd, omitted) {
+    const done = new Set(omitted || [])
+    const blank = '_(left blank)_'
+    const line = (label, key, val) => `*${label}:* ${done.has(key) ? blank : (val ?? blank)}`
+    const social = pd.social_handle ? `${pd.social_platform} @${pd.social_handle}` : null
+    return [
+      '📋 *Preview — review before publishing:*', '',
+      line('Name', 'name', pd.name),
+      line('School', 'school', pd.school),
+      line('School type', 'school_type', pd.school_type),
+      line('Position', 'position', pd.position),
+      line('Height', 'height', formatHeight(pd.height_inches)),
+      line('Social', 'social', social),
+      line('Photo', 'photo', pd.photo_url ? 'attached' : null),
+    ].join('\n')
+  },
+  previewPhoto(pd) { return pd.photo_url || null },
+  async finalize(pd) {
+    const slug = await uniqueSlug('athletes', pd.name)
+    const row = {
+      slug, name: pd.name,
+      school: pd.school || null,
+      school_type: pd.school_type || null,
+      position: pd.position || null,
+      height_inches: pd.height_inches ?? null,
+      sport: 'basketball', status: 'nil_client',
+      photo_url: pd.photo_url || null,
+      published: true, featured: false,
+    }
+    if (pd.social_platform && pd.social_handle) row[pd.social_platform] = pd.social_handle
+    const { error } = await db.from('athletes').insert(row).select().single()
+    if (error) throw error
+    await triggerDeploy()
+    return `✅ *${pd.name}* has been published. The site will rebuild shortly.`
+  },
 }
 
-async function sendPreview(ctx, chatId, pd, omitted) {
-  await setSession(chatId, { step: 'await_confirm', awaiting: null, player_data: pd, omitted })
-  const summary = summarize(pd, omitted)
+// ── CONTRACT (NIL agreement execution) ──────────────────────────────────────
+// Reuses the existing nil_agreements table + /nil-agreement signing portal.
+// The bot creates the agreement (service role → no PIN needed here; the
+// Telegram bot token is the gate) and hands back the athlete signing link.
+const contractFlow = {
+  name: 'contract',
+  intro: "Let's execute a NIL agreement. I'll create the record and hand you a signing link for the athlete.",
+  photoKey: null,
+  fields: [
+    { key: 'athlete_name',   label: 'athlete name', skippable: false, prompt: "What's the *athlete's full name* for this agreement? (first and last)" },
+    { key: 'effective_date', label: 'effective date', skippable: false, prompt: 'What *effective date*? (e.g. `today`, `2026-08-01`, or `8/1/2026`)' },
+    { key: 'term_years',     label: 'term (years)', skippable: false, prompt: 'What *term* in years? (1–10)' },
+  ],
+  isFilled(pd, key) {
+    switch (key) {
+      case 'athlete_name':   return !!pd.athlete_name
+      case 'effective_date': return !!pd.effective_date
+      case 'term_years':     return pd.term_years != null
+      default:               return false
+    }
+  },
+  apply(pd, key, text) {
+    switch (key) {
+      case 'athlete_name': {
+        const n = parseName(text)
+        if (!n) return { ok: false, error: 'I need *both* a first and last name (e.g. `Trey Alexander`).' }
+        pd.athlete_name = n.name; return { ok: true }
+      }
+      case 'effective_date': {
+        const d = parseDate(text)
+        if (!d) return { ok: false, error: 'Couldn\'t read that date. Try `today`, `2026-08-01`, or `8/1/2026`.' }
+        pd.effective_date = d; return { ok: true }
+      }
+      case 'term_years': {
+        const y = parseTermYears(text)
+        if (y == null) return { ok: false, error: 'Enter a whole number of years between *1* and *10*.' }
+        pd.term_years = y; return { ok: true }
+      }
+      default: return { ok: false, error: 'Unknown field.' }
+    }
+  },
+  summarize(pd) {
+    return [
+      '📋 *Preview — review before creating the agreement:*', '',
+      `*Athlete:* ${pd.athlete_name}`,
+      `*Effective date:* ${pd.effective_date}`,
+      `*Term:* ${pd.term_years} year${pd.term_years === 1 ? '' : 's'}`,
+      '',
+      '_Creating this generates a signing link the athlete uses to review and sign._',
+    ].join('\n')
+  },
+  previewPhoto() { return null },
+  async finalize(pd) {
+    const { data, error } = await db
+      .from('nil_agreements')
+      .insert({
+        athlete_name:   pd.athlete_name,
+        effective_date: pd.effective_date,
+        term_years:     pd.term_years,
+      })
+      .select('agreement_url_token')
+      .single()
+    if (error) throw error
+    const token = data?.agreement_url_token
+    if (!token) throw new Error('No agreement token returned')
+    const link = `${SITE_URL}/nil-agreement?token=${token}`
+    return [
+      `✅ Agreement created for *${pd.athlete_name}*.`,
+      '',
+      '*Send this signing link to the athlete:*',
+      link,
+      '',
+      '_You\'ll get an email the moment they sign._',
+    ].join('\n')
+  },
+}
+
+// ── NEWS (article publishing) ───────────────────────────────────────────────
+const DEFAULT_AUTHOR = 'Hyche International Management Sports Group'
+const newsFlow = {
+  name: 'news',
+  intro: "Let's publish a news article. I'll collect the details and post it to the site.",
+  photoKey: 'article_image',
+  fields: [
+    { key: 'title',         label: 'headline', skippable: false, prompt: "What's the *headline / title*?" },
+    { key: 'excerpt',       label: 'excerpt', skippable: true, prompt: 'A short *excerpt / summary* for the card? (1–2 sentences)' },
+    { key: 'body',          label: 'article body', skippable: false, prompt: 'Send the *article body*. (You can send it as one long message.)' },
+    { key: 'article_image', label: 'featured image', type: 'photo', skippable: true, prompt: 'Send a *featured image* (as an image), or reply *skip*.' },
+    { key: 'author',        label: 'author', skippable: true, prompt: `Who's the *author*? (reply *skip* to use "${DEFAULT_AUTHOR}")` },
+  ],
+  isFilled(pd, key) {
+    switch (key) {
+      case 'title':         return !!pd.title
+      case 'excerpt':       return !!pd.excerpt
+      case 'body':          return !!pd.body
+      case 'article_image': return !!pd.article_image_url
+      case 'author':        return !!pd.author
+      default:              return false
+    }
+  },
+  storePhoto(pd, url) { pd.article_image_url = url },
+  apply(pd, key, text) {
+    switch (key) {
+      case 'title': {
+        const t = text.trim()
+        if (t.length < 4) return { ok: false, error: 'That title looks too short — give me the full headline.' }
+        pd.title = t; return { ok: true }
+      }
+      case 'excerpt': pd.excerpt = text.trim(); return { ok: true }
+      case 'body': {
+        const b = text.trim()
+        if (b.length < 20) return { ok: false, error: 'The article body looks too short. Send the full text.' }
+        pd.body = b; return { ok: true }
+      }
+      case 'author': pd.author = text.trim(); return { ok: true }
+      default: return { ok: false, error: 'Unknown field.' }
+    }
+  },
+  summarize(pd, omitted) {
+    const done = new Set(omitted || [])
+    const blank = '_(left blank)_'
+    const line = (label, key, val) => `*${label}:* ${done.has(key) ? blank : (val ?? blank)}`
+    const bodyPreview = pd.body ? (pd.body.length > 160 ? pd.body.slice(0, 157) + '…' : pd.body) : null
+    return [
+      '📋 *Preview — review before publishing:*', '',
+      line('Headline', 'title', pd.title),
+      line('Excerpt', 'excerpt', pd.excerpt),
+      `*Body:* ${done.has('body') ? blank : (bodyPreview ?? blank)}`,
+      line('Image', 'article_image', pd.article_image_url ? 'attached' : null),
+      line('Author', 'author', done.has('author') ? DEFAULT_AUTHOR : (pd.author || DEFAULT_AUTHOR)),
+    ].join('\n')
+  },
+  previewPhoto(pd) { return pd.article_image_url || null },
+  async finalize(pd) {
+    const slug = await uniqueSlug('articles', pd.title)
+    const { error } = await db.from('articles').insert({
+      slug,
+      title:          pd.title,
+      excerpt:        pd.excerpt || null,
+      body:           pd.body || null,
+      featured_image: pd.article_image_url || null,
+      author:         pd.author || DEFAULT_AUTHOR,
+      published:      true,
+      published_at:   new Date().toISOString(),
+    }).select().single()
+    if (error) throw error
+    await triggerDeploy()
+    return `✅ *${pd.title}* has been published to the news feed. The site will rebuild shortly.`
+  },
+}
+
+const FLOWS = { roster: rosterFlow, contract: contractFlow, news: newsFlow }
+const getFlow = name => FLOWS[name] || rosterFlow
+const fieldDef = (flow, key) => flow.fields.find(f => f.key === key)
+const subjectOf = pd => pd?.name || pd?.athlete_name || pd?.title || null
+
+// ── Command detection → which flow to start ─────────────────────────────────
+function detectStart(text) {
+  const t = text.trim()
+  if (/^\/?(add(\s+player)?|new\s+player|roster)\b/i.test(t)) return 'roster'
+  if (/^\/?(contract|new\s+contract|add\s+contract|execute(\s+contract)?|agreement|new\s+agreement)\b/i.test(t)) return 'contract'
+  if (/^\/?(news|post\s+news|new\s+article|add\s+article|publish|article)\b/i.test(t)) return 'news'
+  return null
+}
+
+const HELP = [
+  'I can do three things — just tell me which:',
+  '',
+  '🏀 *Add player* — publish an athlete to the roster.',
+  '📝 *Execute contract* — create a NIL agreement + get a signing link.',
+  '📰 *Post news* — publish an article to the news feed.',
+  '',
+  'For any of them I\'ll walk you through each field, let you review, and won\'t save until you *APPROVE*. Reply *CANCEL* anytime to abandon.',
+].join('\n')
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SHARED STATE-MACHINE CORE
+// ═══════════════════════════════════════════════════════════════════════════
+
+function nextMissing(flow, pd, omitted) {
+  const done = new Set(omitted || [])
+  for (const f of flow.fields) {
+    if (done.has(f.key)) continue
+    if (flow.isFilled(pd, f.key)) continue
+    return f.key
+  }
+  return null
+}
+
+async function advance(ctx, chatId, flow, pd, omitted) {
+  const next = nextMissing(flow, pd, omitted)
+  if (!next) return sendPreview(ctx, chatId, flow, pd, omitted)
+  await setSession(chatId, { flow: flow.name, step: 'collecting', awaiting: next, player_data: pd, omitted })
+  const f = fieldDef(flow, next)
+  const hint = (f.type === 'photo' || !f.skippable) ? '' : SKIP_HINT
+  await ctx.reply(`${f.prompt}${hint}`, { parse_mode: 'Markdown' })
+}
+
+async function sendPreview(ctx, chatId, flow, pd, omitted) {
+  await setSession(chatId, { flow: flow.name, step: 'await_confirm', awaiting: null, player_data: pd, omitted })
+  const summary = flow.summarize(pd, omitted)
   const omittedCount = (omitted || []).length
   const tail = omittedCount > 0
     ? `\n\n⚠️ ${omittedCount} field${omittedCount > 1 ? 's' : ''} left blank on purpose.`
     : ''
-  const footer = '\n\nReply *APPROVE* to publish, or *CANCEL* to discard.'
-  if (pd.photo_url) {
-    try { await ctx.replyWithPhoto(pd.photo_url, { caption: summary + tail + footer, parse_mode: 'Markdown' }) }
-    catch { await ctx.reply(summary + tail + footer + `\n\nPhoto: ${pd.photo_url}`, { parse_mode: 'Markdown' }) }
+  const footer = flow.name === 'contract'
+    ? '\n\nReply *APPROVE* to create the agreement, or *CANCEL* to discard.'
+    : '\n\nReply *APPROVE* to publish, or *CANCEL* to discard.'
+  const photo = flow.previewPhoto ? flow.previewPhoto(pd) : null
+  if (photo) {
+    try { await ctx.replyWithPhoto(photo, { caption: summary + tail + footer, parse_mode: 'Markdown' }) }
+    catch { await ctx.reply(summary + tail + footer + `\n\nImage: ${photo}`, { parse_mode: 'Markdown' }) }
   } else {
     await ctx.reply(summary + tail + footer, { parse_mode: 'Markdown' })
   }
 }
-
-// ── Command detection ────────────────────────────────────────────────────────
-function isStartCommand(text) {
-  return /^\/?(add(\s+player)?|start|new)\b/i.test(text)
-}
-
-const HELP = 'To add an athlete, send `Add player` and I\'ll walk you through it — photo, name, school + type, position, height, and a social handle. I won\'t publish until the record is complete (or you confirm what you\'re leaving blank).'
 
 // ═══════════════════════════════════════════════════════════════════════════
 // TEXT HANDLER
@@ -303,22 +508,26 @@ bot.on('text', async (ctx) => {
   const text = ctx.message.text.trim()
   const session = await getSession(chatId)
   const step = session?.step ?? 'idle'
+  const flow = getFlow(session?.flow)
   const upper = text.toUpperCase()
 
   // Global: cancel anytime
   if (upper === 'CANCEL') {
-    if (step !== 'idle') log('cancelled', session?.player_data?.name)
+    if (step !== 'idle') log('cancelled', session?.flow, subjectOf(session?.player_data))
     await clearSession(chatId)
     await ctx.reply('Cancelled. Nothing was saved.')
     return
   }
 
-  // Start / restart a collection
-  if (isStartCommand(text)) {
+  // Start / restart a flow
+  const startFlow = detectStart(text)
+  if (startFlow) {
+    const f = getFlow(startFlow)
     const pd = {}
-    await setSession(chatId, { step: 'collecting', awaiting: null, player_data: pd, omitted: [] })
-    await ctx.reply('Let\'s build a complete athlete record. I\'ll ask for each field.', { parse_mode: 'Markdown' })
-    await advance(ctx, chatId, pd, [])
+    await setSession(chatId, { flow: f.name, step: 'collecting', awaiting: null, player_data: pd, omitted: [] })
+    log('flow_started', f.name)
+    await ctx.reply(f.intro, { parse_mode: 'Markdown' })
+    await advance(ctx, chatId, f, pd, [])
     return
   }
 
@@ -328,17 +537,16 @@ bot.on('text', async (ctx) => {
     const omitField = session.pending_omit
     if (upper === 'CONFIRM') {
       const omitted = Array.from(new Set([...(session.omitted || []), omitField]))
-      log('field_omitted', pd.name)
-      await ctx.reply(`Okay — *${fieldDef(omitField)?.label}* left blank.`, { parse_mode: 'Markdown' })
-      await advance(ctx, chatId, pd, omitted)
+      log('field_omitted', flow.name, subjectOf(pd))
+      await ctx.reply(`Okay — *${fieldDef(flow, omitField)?.label}* left blank.`, { parse_mode: 'Markdown' })
+      await advance(ctx, chatId, flow, pd, omitted)
     } else {
-      // They typed a value instead of confirming → treat as providing it
-      const res = applyField(pd, omitField, text)
+      const res = flow.apply(pd, omitField, text)
       if (!res.ok) {
-        await ctx.reply(`${res.error}\n\n_Or reply_ *CONFIRM* _to leave_ *${fieldDef(omitField)?.label}* _blank._`, { parse_mode: 'Markdown' })
+        await ctx.reply(`${res.error}\n\n_Or reply_ *CONFIRM* _to leave_ *${fieldDef(flow, omitField)?.label}* _blank._`, { parse_mode: 'Markdown' })
         return
       }
-      await advance(ctx, chatId, pd, session.omitted || [])
+      await advance(ctx, chatId, flow, pd, session.omitted || [])
     }
     return
   }
@@ -348,30 +556,36 @@ bot.on('text', async (ctx) => {
     const pd = session.player_data || {}
     const awaiting = session.awaiting
     const omitted = session.omitted || []
+    if (!awaiting) { await advance(ctx, chatId, flow, pd, omitted); return }
 
-    if (!awaiting) { await advance(ctx, chatId, pd, omitted); return }
+    const f = fieldDef(flow, awaiting)
 
     // Intentional skip → require explicit confirmation before it counts
     if (upper === 'SKIP') {
-      if (awaiting === 'photo') {
-        await setSession(chatId, { step: 'await_omit_confirm', pending_omit: 'photo', player_data: pd, omitted })
-        await ctx.reply('Publish this athlete with *no photo*? Reply *CONFIRM* to omit, or send the image.', { parse_mode: 'Markdown' })
+      if (!f?.skippable) {
+        await ctx.reply(`*${f?.label}* is required — I can't leave it blank. Please provide it.`, { parse_mode: 'Markdown' })
         return
       }
-      await setSession(chatId, { step: 'await_omit_confirm', pending_omit: awaiting, player_data: pd, omitted })
-      await ctx.reply(`Leave *${fieldDef(awaiting)?.label}* blank? Reply *CONFIRM* to omit, or just send the value.`, { parse_mode: 'Markdown' })
+      if (f.type === 'photo') {
+        await setSession(chatId, { flow: flow.name, step: 'await_omit_confirm', pending_omit: awaiting, player_data: pd, omitted })
+        await ctx.reply(`Publish with *no ${f.label}*? Reply *CONFIRM* to omit, or send the image.`, { parse_mode: 'Markdown' })
+        return
+      }
+      await setSession(chatId, { flow: flow.name, step: 'await_omit_confirm', pending_omit: awaiting, player_data: pd, omitted })
+      await ctx.reply(`Leave *${f.label}* blank? Reply *CONFIRM* to omit, or just send the value.`, { parse_mode: 'Markdown' })
       return
     }
 
-    // Photo is collected via the photo handler, not text
-    if (awaiting === 'photo') {
-      await ctx.reply('Please *send an image* for the photo, or reply *skip* to omit it.', { parse_mode: 'Markdown' })
+    // Photo fields are collected via the photo handler, not text
+    if (f?.type === 'photo') {
+      const skipHint = f.skippable ? ', or reply *skip* to omit it' : ''
+      await ctx.reply(`Please *send an image*${skipHint}.`, { parse_mode: 'Markdown' })
       return
     }
 
-    const res = applyField(pd, awaiting, text)
+    const res = flow.apply(pd, awaiting, text)
     if (!res.ok) { await ctx.reply(res.error, { parse_mode: 'Markdown' }); return }
-    await advance(ctx, chatId, pd, omitted)
+    await advance(ctx, chatId, flow, pd, omitted)
     return
   }
 
@@ -380,17 +594,16 @@ bot.on('text', async (ctx) => {
     if (upper === 'APPROVE') {
       const pd = session.player_data || {}
       try {
-        await insertAthlete(pd)
-        await triggerDeploy()
+        const reply = await flow.finalize(pd)
         await clearSession(chatId)
-        log('approved', pd.name)
-        await ctx.reply(`✅ *${pd.name}* has been published. The site will rebuild shortly.`, { parse_mode: 'Markdown' })
+        log('approved', flow.name, subjectOf(pd))
+        await ctx.reply(reply, { parse_mode: 'Markdown', disable_web_page_preview: true })
       } catch (err) {
-        console.error('Approve error:', err)
-        await ctx.reply('Something went wrong saving the athlete. Please try again.')
+        console.error('Finalize error:', err)
+        await ctx.reply('Something went wrong saving that. Please try again.')
       }
     } else {
-      await ctx.reply('Reply *APPROVE* to publish or *CANCEL* to discard.', { parse_mode: 'Markdown' })
+      await ctx.reply('Reply *APPROVE* to confirm or *CANCEL* to discard.', { parse_mode: 'Markdown' })
     }
     return
   }
@@ -406,22 +619,31 @@ bot.on('photo', async (ctx) => {
   const chatId = ctx.chat.id
   const session = await getSession(chatId)
   const step = session?.step ?? 'idle'
+  const flow = getFlow(session?.flow)
 
   if (step !== 'collecting' && step !== 'await_omit_confirm' && step !== 'await_confirm') {
-    await ctx.reply('Send `Add player` to get started.', { parse_mode: 'Markdown' })
+    await ctx.reply(HELP, { parse_mode: 'Markdown' })
+    return
+  }
+
+  // Flow has no photo field (e.g. contract), or we're not at the photo step
+  if (!flow.photoKey) {
+    await ctx.reply('This step doesn\'t take a photo. Please send the requested text.')
     return
   }
 
   const pd = session.player_data || {}
+  const bucket = flow.name === 'news' ? 'article-images' : 'athlete-photos'
   const fileId = ctx.message.photo[ctx.message.photo.length - 1].file_id
   try {
     await ctx.reply('Uploading photo...')
     const fileLink = await ctx.telegram.getFileLink(fileId)
-    pd.photo_url = await storePhoto(fileLink.href, pd.name)
-    // A photo removes 'photo' from any prior omission
-    const omitted = (session.omitted || []).filter(k => k !== 'photo')
+    const url = await storePhoto(fileLink.href, subjectOf(pd), bucket)
+    flow.storePhoto(pd, url)
+    // A photo removes the photo field from any prior omission
+    const omitted = (session.omitted || []).filter(k => k !== flow.photoKey)
     await ctx.reply('✅ Photo saved.')
-    await advance(ctx, chatId, pd, omitted)
+    await advance(ctx, chatId, flow, pd, omitted)
   } catch (err) {
     console.error('Photo error:', err)
     await ctx.reply('Could not process the photo. Please try again.')
