@@ -11,8 +11,10 @@ export interface Athlete {
   position: string | null
   sport: string
   school: string | null
+  school_type: 'prep' | 'juco' | 'international' | null
   class_year: string | null
   division: string | null
+  height_inches: number | null
   status: AthleteStatus
   photo_url: string | null
   nil_value_display: string | null
