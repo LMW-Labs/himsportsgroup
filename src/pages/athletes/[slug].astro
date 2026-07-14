@@ -24,9 +24,14 @@ const STATUS_CONFIG: Record<string, { label: string; bg: string; text: string; b
 
 const status = athlete.status ? STATUS_CONFIG[athlete.status] : null
 
+const formatHeight = (inches: number | null): string | null => {
+  if (inches == null) return null
+  return `${Math.floor(inches / 12)}'${inches % 12}"`
+}
+
 const physicals: { label: string; value: string }[] = [
-  // athlete type doesn't currently expose these fields — extend as needed
-].filter(Boolean)
+  formatHeight(athlete.height_inches) && { label: 'Height', value: formatHeight(athlete.height_inches)! },
+].filter(Boolean) as { label: string; value: string }[]
 
 const socials: { href: string; label: string }[] = [
   athlete.instagram && { href: `https://instagram.com/${athlete.instagram.replace('@', '')}`, label: 'Instagram' },
