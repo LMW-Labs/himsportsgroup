@@ -20,7 +20,10 @@ Boutique NIL and athlete representation agency site for Christopher Hyche (forme
 - `src/components/interactive/NILAgreement.tsx` — Full NIL signing portal (admin + athlete)
 - `api/send-email.ts` — Resend email edge function (admin notification + athlete confirmation)
 - `api/create-agreement.ts` — Server-side PIN check + Supabase insert (PIN never exposed to client)
-- `api/telegram.js` — Telegram bot webhook handler
+- `api/telegram.js` — Telegram bot webhook handler. Flow-registry state machine with three guided intake flows (each: collect → validate → preview → APPROVE gate, CANCEL anytime):
+  - **roster** ("Add player") — publishes an athlete to the `athletes` table + triggers rebuild.
+  - **contract** ("Execute contract") — creates a `nil_agreements` row via service role (no PIN — the bot token is the gate) and returns the `/nil-agreement?token=…` signing link. No rebuild (portal reads Supabase live).
+  - **news** ("Post news") — publishes an article to the `articles` table + triggers rebuild.
 
 ## Design Tokens (used consistently across all components)
 ```
