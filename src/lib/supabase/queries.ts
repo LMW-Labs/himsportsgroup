@@ -14,6 +14,18 @@ export async function getAthletes(): Promise<Athlete[]> {
   return data
 }
 
+export async function getAthletesBySport(sport: string): Promise<Athlete[]> {
+  const { data, error } = await supabase
+    .from('athletes')
+    .select('*')
+    .eq('published', true)
+    .eq('sport', sport)
+    .order('name')
+
+  if (error) throw new Error(`getAthletesBySport(${sport}): ${error.message}`)
+  return data
+}
+
 export async function getFeaturedAthletes(): Promise<Athlete[]> {
   const { data, error } = await supabase
     .from('athletes')

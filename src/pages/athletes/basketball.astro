@@ -1,13 +1,28 @@
 ---
 import PublicLayout from '../../layouts/PublicLayout.astro'
+import { getAthletesBySport } from '../../lib/supabase/queries'
+import type { Athlete } from '../../lib/supabase/types'
 
-const players = [
-  { name: 'Tyler Husband', position: 'PG', height: '5\'10"', school: 'Jackson State University', photo: '/athletes/tyler-husband.png' },
-  { name: 'Cam Myers', position: 'Wing', height: '6\'4"', school: 'Angelina College (JUCO)' },
-  { name: 'Marcus Smith', position: 'PG', height: '6\'1"', school: 'Cowley (JUCO)', photo: '/athletes/marcus-smith.jpg' },
-  { name: 'Filip Stancevic', position: 'Wing', height: '6\'5"', school: 'Undecided' },
-  { name: 'Trey Alexander', position: 'PG', height: '6\'1"', school: 'Ouachita Baptist', photo: '/athletes/trey-alexander.jpg' },
-]
+let athletes: Athlete[] = []
+try {
+  athletes = await getAthletesBySport('basketball')
+} catch {
+  // No athletes yet or Supabase unreachable at build time
+}
+
+function formatHeight(inches: number | null): string | null {
+  if (inches == null) return null
+  return `${Math.floor(inches / 12)}'${inches % 12}"`
+}
+
+const players = athletes.map(a => ({
+  slug: a.slug,
+  name: a.name,
+  position: a.position,
+  height: formatHeight(a.height_inches),
+  school: a.school,
+  photo: a.photo_url,
+}))
 ---
 
 <PublicLayout
@@ -55,36 +70,43 @@ const players = [
         </div>
       </div>
 
-      <div class="player-grid">
-        {players.map((player, i) => (
-          <div class="player-card reveal" style={`--delay:${(i % 4) * 0.08}s`}>
-            <div class="card-accent-line" aria-hidden="true"></div>
-            <div class="card-number">{String(i + 1).padStart(2, '0')}</div>
-            {player.photo ? (
-              <div class="player-photo has-image">
-                <img src={player.photo} alt={player.name} loading="lazy" />
-              </div>
-            ) : (
-              <div class="player-photo" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.5"/>
-                  <path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                </svg>
-              </div>
-            )}
-            <div class="card-body">
-              {player.position && (
-                <div class="player-meta">
-                  <span class="player-position">{player.position}</span>
-                  {player.height && <span class="player-height">{player.height}</span>}
+      {players.length > 0 ? (
+        <div class="player-grid">
+          {players.map((player, i) => (
+            <a href={`/athletes/${player.slug}`} class="player-card reveal" style={`--delay:${(i % 4) * 0.08}s`}>
+              <div class="card-accent-line" aria-hidden="true"></div>
+              <div class="card-number">{String(i + 1).padStart(2, '0')}</div>
+              {player.photo ? (
+                <div class="player-photo has-image">
+                  <img src={player.photo} alt={player.name} loading="lazy" />
+                </div>
+              ) : (
+                <div class="player-photo" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.5"/>
+                    <path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                  </svg>
                 </div>
               )}
-              <h3 class="player-name">{player.name}</h3>
-              {player.school && <p class="player-school">{player.school}</p>}
-            </div>
-          </div>
-        ))}
-      </div>
+              <div class="card-body">
+                {player.position && (
+                  <div class="player-meta">
+                    <span class="player-position">{player.position}</span>
+                    {player.height && <span class="player-height">{player.height}</span>}
+                  </div>
+                )}
+                <h3 class="player-name">{player.name}</h3>
+                {player.school && <p class="player-school">{player.school}</p>}
+              </div>
+            </a>
+          ))}
+        </div>
+      ) : (
+        <div class="empty-state">
+          <p class="empty-headline">NO PLAYERS YET</p>
+          <p class="empty-sub">No basketball athletes have been published yet. Check back soon.</p>
+        </div>
+      )}
     </div>
   </section>
 
@@ -239,10 +261,12 @@ const players = [
     gap: 2px;
   }
   .player-card {
+    display: block;
     position: relative; overflow: hidden;
     background-color: var(--color-surface);
     border: 1px solid rgba(168,189,208,0.07);
     padding: 32px 28px 28px;
+    text-decoration: none; color: inherit;
     transition: border-color 220ms, transform 220ms, box-shadow 220ms;
   }
   .player-card:hover {
@@ -311,6 +335,15 @@ const players = [
     font-size: 12.5px; color: rgba(168,189,208,0.5);
     line-height: 1.4;
   }
+
+  /* ── Empty state ── */
+  .empty-state { text-align: center; padding: 96px 24px; }
+  .empty-headline {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(48px, 6vw, 80px); letter-spacing: 0.04em;
+    color: rgba(168,189,208,0.15); margin-bottom: 16px;
+  }
+  .empty-sub { font-family: 'DM Sans', sans-serif; font-size: 15px; color: rgba(168,189,208,0.4); }
 
   /* ── CTA ── */
   .cta-section {
