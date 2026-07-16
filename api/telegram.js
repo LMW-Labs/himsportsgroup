@@ -142,7 +142,7 @@ function parseTermYears(raw) {
   const s = String(raw).trim().match(/^(\d{1,2})/)
   if (!s) return null
   const n = parseInt(s[1], 10)
-  return (n >= 1 && n <= 10) ? n : null
+  return (n === 1 || n === 2) ? n : null
 }
 
 // ── Storage / slug helpers ──────────────────────────────────────────────────
@@ -294,7 +294,7 @@ const contractFlow = {
   fields: [
     { key: 'athlete_name',   label: 'athlete name', skippable: false, prompt: "What's the *athlete's full name* for this agreement? (first and last)" },
     { key: 'effective_date', label: 'effective date', skippable: false, prompt: 'What *effective date*? (e.g. `today`, `2026-08-01`, or `8/1/2026`)' },
-    { key: 'term_years',     label: 'term (years)', skippable: false, prompt: 'What *term* in years? (1–10)' },
+    { key: 'term_years',     label: 'term (years)', skippable: false, prompt: 'What *term*? (1 or 2 years)' },
   ],
   isFilled(pd, key) {
     switch (key) {
@@ -318,7 +318,7 @@ const contractFlow = {
       }
       case 'term_years': {
         const y = parseTermYears(text)
-        if (y == null) return { ok: false, error: 'Enter a whole number of years between *1* and *10*.' }
+        if (y == null) return { ok: false, error: 'Agreements run *1* or *2* years — which one?' }
         pd.term_years = y; return { ok: true }
       }
       default: return { ok: false, error: 'Unknown field.' }
