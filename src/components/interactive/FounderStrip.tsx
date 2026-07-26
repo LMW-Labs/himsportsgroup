@@ -71,7 +71,7 @@ export default function FounderStrip() {
                 Chris Hyche grew up in Jackson, Mississippi — a Dandy Dozen honoree at Provine High School, then college ball at Jackson State and Talladega College. After college he went pro across four countries: Mexico, Kosovo, Morocco, and the ABA's Jackson Showboats.
               </p>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '15px', color: 'rgba(168,189,208,0.7)', lineHeight: 1.75, maxWidth: '480px' }}>
-                In 2018 he joined the <strong style={{ color: '#D8E8F4', fontWeight: 500 }}>Harlem Globetrotters</strong>. 38 states. 26+ countries. Millions of fans. He didn't just play the game. He performed it. He branded it. He learned what it actually feels like to be the athlete in the room.
+                In 2015 he joined the <strong style={{ color: '#D8E8F4', fontWeight: 500 }}>Harlem Globetrotters</strong>. 38 states. 26+ countries. Millions of fans. He didn't just play the game. He performed it. He branded it. He learned what it actually feels like to be the athlete in the room.
               </p>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '15px', color: 'rgba(168,189,208,0.7)', lineHeight: 1.75, maxWidth: '480px' }}>
                 Hyche International Management Sports Group was built on one belief: <em style={{ color: '#D8E8F4' }}>every athlete deserves an agent who was actually in the arena.</em>
@@ -128,7 +128,7 @@ export default function FounderStrip() {
                 <div style={{ marginBottom: '28px' }}>
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', backgroundColor: 'rgba(200,80,16,0.1)', border: '1px solid rgba(200,80,16,0.25)', padding: '7px 14px', fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '0.65rem', letterSpacing: '0.22em', color: '#C85010', textTransform: 'uppercase' }}>
                     <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#C85010', flexShrink: 0 }} />
-                    HARLEM GLOBETROTTER · EST. 2018
+                    HARLEM GLOBETROTTER · EST. 2015
                   </span>
                 </div>
 
