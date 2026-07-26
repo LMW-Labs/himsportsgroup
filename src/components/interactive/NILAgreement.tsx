@@ -339,51 +339,29 @@ export default function NILAgreement() {
     ctx.stroke()
   }
 
-  function handleMouseDown(e: React.MouseEvent<HTMLCanvasElement>) {
+  // Pointer Events unify mouse/touch/pen into one codepath. setPointerCapture pins all
+  // subsequent move events to the canvas even if iOS tries to hand the gesture to its
+  // scroll/pan recognizer — that's what was leaving only isolated dots on touchstart.
+  function handlePointerDown(e: React.PointerEvent<HTMLCanvasElement>) {
     if (signMode !== 'draw') return
+    e.preventDefault()
+    const canvas = canvasRef.current!
+    canvas.setPointerCapture(e.pointerId)
     isDrawing.current = true
-    const pos = getPos(canvasRef.current!, e.clientX, e.clientY)
+    const pos = getPos(canvas, e.clientX, e.clientY)
     lastPos.current = pos
-    drawDot(canvasRef.current!.getContext('2d')!, pos.x, pos.y)
+    drawDot(canvas.getContext('2d')!, pos.x, pos.y)
   }
 
-  function handleMouseMove(e: React.MouseEvent<HTMLCanvasElement>) {
+  function handlePointerMove(e: React.PointerEvent<HTMLCanvasElement>) {
     if (!isDrawing.current || signMode !== 'draw') return
+    e.preventDefault()
     const pos = getPos(canvasRef.current!, e.clientX, e.clientY)
     drawLine(canvasRef.current!.getContext('2d')!, lastPos.current, pos)
     lastPos.current = pos
   }
 
   function stopDrawing() { isDrawing.current = false }
-
-  function handleTouchStart(e: TouchEvent) {
-    e.preventDefault()
-    if (signMode !== 'draw') return
-    isDrawing.current = true
-    lastPos.current = getPos(canvasRef.current!, e.touches[0].clientX, e.touches[0].clientY)
-  }
-
-  function handleTouchMove(e: TouchEvent) {
-    e.preventDefault()
-    if (!isDrawing.current || signMode !== 'draw') return
-    const pos = getPos(canvasRef.current!, e.touches[0].clientX, e.touches[0].clientY)
-    drawLine(canvasRef.current!.getContext('2d')!, lastPos.current, pos)
-    lastPos.current = pos
-  }
-
-  // React registers onTouchStart/onTouchMove as passive listeners, so preventDefault()
-  // inside them is silently ignored on iOS Safari and the page scrolls mid-stroke.
-  // Bind native listeners directly with { passive: false } so the signature gesture wins.
-  useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-    canvas.addEventListener('touchstart', handleTouchStart, { passive: false })
-    canvas.addEventListener('touchmove', handleTouchMove, { passive: false })
-    return () => {
-      canvas.removeEventListener('touchstart', handleTouchStart)
-      canvas.removeEventListener('touchmove', handleTouchMove)
-    }
-  }, [signMode])
 
   function clearCanvas() {
     if (!canvasRef.current) return
@@ -803,11 +781,11 @@ export default function NILAgreement() {
                 cursor:       signMode === 'draw' ? 'crosshair' : 'default',
                 touchAction:  'none',
               }}
-              onMouseDown={handleMouseDown}
-              onMouseMove={handleMouseMove}
-              onMouseUp={stopDrawing}
-              onMouseLeave={stopDrawing}
-              onTouchEnd={stopDrawing}
+              onPointerDown={handlePointerDown}
+              onPointerMove={handlePointerMove}
+              onPointerUp={stopDrawing}
+              onPointerLeave={stopDrawing}
+              onPointerCancel={stopDrawing}
             />
 
             {signMode === 'draw' && (
