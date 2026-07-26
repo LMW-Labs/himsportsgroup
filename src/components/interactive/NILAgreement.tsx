@@ -356,20 +356,34 @@ export default function NILAgreement() {
 
   function stopDrawing() { isDrawing.current = false }
 
-  function handleTouchStart(e: React.TouchEvent<HTMLCanvasElement>) {
+  function handleTouchStart(e: TouchEvent) {
     e.preventDefault()
     if (signMode !== 'draw') return
     isDrawing.current = true
     lastPos.current = getPos(canvasRef.current!, e.touches[0].clientX, e.touches[0].clientY)
   }
 
-  function handleTouchMove(e: React.TouchEvent<HTMLCanvasElement>) {
+  function handleTouchMove(e: TouchEvent) {
     e.preventDefault()
     if (!isDrawing.current || signMode !== 'draw') return
     const pos = getPos(canvasRef.current!, e.touches[0].clientX, e.touches[0].clientY)
     drawLine(canvasRef.current!.getContext('2d')!, lastPos.current, pos)
     lastPos.current = pos
   }
+
+  // React registers onTouchStart/onTouchMove as passive listeners, so preventDefault()
+  // inside them is silently ignored on iOS Safari and the page scrolls mid-stroke.
+  // Bind native listeners directly with { passive: false } so the signature gesture wins.
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    canvas.addEventListener('touchstart', handleTouchStart, { passive: false })
+    canvas.addEventListener('touchmove', handleTouchMove, { passive: false })
+    return () => {
+      canvas.removeEventListener('touchstart', handleTouchStart)
+      canvas.removeEventListener('touchmove', handleTouchMove)
+    }
+  }, [signMode])
 
   function clearCanvas() {
     if (!canvasRef.current) return
@@ -793,8 +807,6 @@ export default function NILAgreement() {
               onMouseMove={handleMouseMove}
               onMouseUp={stopDrawing}
               onMouseLeave={stopDrawing}
-              onTouchStart={handleTouchStart}
-              onTouchMove={handleTouchMove}
               onTouchEnd={stopDrawing}
             />
 
