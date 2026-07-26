@@ -414,7 +414,7 @@ export default function NILAgreement() {
     try {
       let pdfBase64: string | null = null
       const jspdf = (window as any).jspdf
-      if (jspdf && athleteEmail) {
+      if (jspdf) {
         pdfBase64 = buildPDFBase64(jspdf, agreement!, canvasRef.current)
       }
       await fetch('/api/send-email', {

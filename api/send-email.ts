@@ -44,7 +44,7 @@ export default async function handler(request: Request): Promise<Response> {
     })
   }
 
-  // Admin notification (no PDF attachment needed)
+  // Admin notification, with signed PDF attached
   await send(
     [adminEmail],
     `NIL Agreement Signed — ${athleteName}`,
@@ -53,8 +53,10 @@ export default async function handler(request: Request): Promise<Response> {
       <p><strong>${athleteName}</strong> has signed their NIL Representation Agreement.</p>
       <p><strong>Signed:</strong> ${timestamp} CST</p>
       ${athleteEmail ? `<p><strong>Athlete email:</strong> ${athleteEmail}</p>` : ''}
+      ${pdfBase64 ? '<p>The signed agreement is attached as a PDF.</p>' : ''}
       <p style="margin-top:32px;color:#888;font-size:13px">— Hyche International Management Sports Group</p>
     </div>`,
+    pdfBase64 ? [{ filename: pdfFilename, content: pdfBase64 }] : undefined,
   )
 
   // Athlete confirmation with PDF attached
