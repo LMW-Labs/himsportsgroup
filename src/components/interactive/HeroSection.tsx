@@ -238,7 +238,7 @@ function StatCounter({ value, label }: { value: string; label: string }) {
 /* ─── Hero ──────────────────────────────────────────────────────────────────── */
 const stats = [
   { value: '5',    label: 'Athletes Represented' },
-  { value: '$3M+', label: 'Deal In Progress' },
+  // { value: '$3M+', label: 'Deal In Progress' }, // hidden until we have a real number to report
   { value: '26+',  label: 'Countries Reached' },
   { value: '12',   label: 'Years In The Game' },
 ]

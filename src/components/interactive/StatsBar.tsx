@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 
 const stats = [
   { raw: 5,  prefix: '',  suffix: '',   label: 'Athletes Represented' },
-  { raw: 3,  prefix: '$', suffix: 'M+', label: 'Deal In Progress'     },
+  // { raw: 3,  prefix: '$', suffix: 'M+', label: 'Deal In Progress'     }, // hidden until we have a real number to report
   { raw: 26, prefix: '',  suffix: '+',  label: 'Countries Reached'    },
   { raw: 12, prefix: '',  suffix: '',   label: 'Years In The Game'     },
 ]
