@@ -5,7 +5,7 @@ export default async function handler(request: Request): Promise<Response> {
     return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405 })
   }
 
-  let body: { pin: string; athleteName: string; effectiveDate: string; termYears: number }
+  let body: { pin: string; athleteName: string; effectiveDate: string; termYears: number; commissionPct: number }
   try {
     body = await request.json()
   } catch {
@@ -15,6 +15,10 @@ export default async function handler(request: Request): Promise<Response> {
   const adminPin = (process as any).env.ADMIN_PIN
   if (!adminPin || body.pin !== adminPin) {
     return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 })
+  }
+
+  if (typeof body.commissionPct !== 'number' || !(body.commissionPct > 0 && body.commissionPct <= 100)) {
+    return new Response(JSON.stringify({ error: 'Commission percentage must be between 0 and 100' }), { status: 400 })
   }
 
   const supabaseUrl  = (process as any).env.PUBLIC_SUPABASE_URL
@@ -36,6 +40,7 @@ export default async function handler(request: Request): Promise<Response> {
       athlete_name:   body.athleteName,
       effective_date: body.effectiveDate,
       term_years:     body.termYears,
+      commission_pct: body.commissionPct,
     }),
   })
 

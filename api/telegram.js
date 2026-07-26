@@ -145,6 +145,14 @@ function parseTermYears(raw) {
   return (n === 1 || n === 2) ? n : null
 }
 
+// commission % → number in (0, 100]. Accepts "20", "20%", "17.5".
+function parseCommissionPct(raw) {
+  const s = String(raw).trim().replace(/%$/, '')
+  if (!/^\d{1,3}(\.\d{1,2})?$/.test(s)) return null
+  const n = parseFloat(s)
+  return (n > 0 && n <= 100) ? n : null
+}
+
 // ── Storage / slug helpers ──────────────────────────────────────────────────
 async function storePhoto(telegramUrl, subject, bucket) {
   const slug = (subject || 'file').toLowerCase().replace(/[^a-z0-9]+/g, '-')
@@ -292,15 +300,17 @@ const contractFlow = {
   intro: "Let's execute a NIL agreement. I'll create the record and hand you a signing link for the athlete.",
   photoKey: null,
   fields: [
-    { key: 'athlete_name',   label: 'athlete name', skippable: false, prompt: "What's the *athlete's full name* for this agreement? (first and last)" },
-    { key: 'effective_date', label: 'effective date', skippable: false, prompt: 'What *effective date*? (e.g. `today`, `2026-08-01`, or `8/1/2026`)' },
-    { key: 'term_years',     label: 'term (years)', skippable: false, prompt: 'What *term*? (1 or 2 years)' },
+    { key: 'athlete_name',    label: 'athlete name', skippable: false, prompt: "What's the *athlete's full name* for this agreement? (first and last)" },
+    { key: 'effective_date',  label: 'effective date', skippable: false, prompt: 'What *effective date*? (e.g. `today`, `2026-08-01`, or `8/1/2026`)' },
+    { key: 'term_years',      label: 'term (years)', skippable: false, prompt: 'What *term*? (1 or 2 years)' },
+    { key: 'commission_pct',  label: 'commission percentage', skippable: false, prompt: 'What *commission percentage* will Agent be paid on NIL compensation? (e.g. `20` or `17.5`)' },
   ],
   isFilled(pd, key) {
     switch (key) {
       case 'athlete_name':   return !!pd.athlete_name
       case 'effective_date': return !!pd.effective_date
       case 'term_years':     return pd.term_years != null
+      case 'commission_pct': return pd.commission_pct != null
       default:               return false
     }
   },
@@ -321,6 +331,11 @@ const contractFlow = {
         if (y == null) return { ok: false, error: 'Agreements run *1* or *2* years — which one?' }
         pd.term_years = y; return { ok: true }
       }
+      case 'commission_pct': {
+        const c = parseCommissionPct(text)
+        if (c == null) return { ok: false, error: 'Give me a commission percentage between 0 and 100 (e.g. `20` or `17.5`).' }
+        pd.commission_pct = c; return { ok: true }
+      }
       default: return { ok: false, error: 'Unknown field.' }
     }
   },
@@ -330,6 +345,7 @@ const contractFlow = {
       `*Athlete:* ${pd.athlete_name}`,
       `*Effective date:* ${pd.effective_date}`,
       `*Term:* ${pd.term_years} year${pd.term_years === 1 ? '' : 's'}`,
+      `*Commission:* ${pd.commission_pct}%`,
       '',
       '_Creating this generates a signing link the athlete uses to review and sign._',
     ].join('\n')
@@ -342,6 +358,7 @@ const contractFlow = {
         athlete_name:   pd.athlete_name,
         effective_date: pd.effective_date,
         term_years:     pd.term_years,
+        commission_pct: pd.commission_pct,
       })
       .select('agreement_url_token')
       .single()

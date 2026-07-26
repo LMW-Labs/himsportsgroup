@@ -20,6 +20,7 @@ interface AgreementRow {
   athlete_name: string
   effective_date: string
   term_years: number
+  commission_pct: number
   agreement_url_token: string
   status: string
 }
@@ -130,9 +131,14 @@ function fmtDate(iso: string) {
   return new Date(iso + 'T12:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
 }
 
-function getAgreementSections(athleteName: string, effectiveDate: string, termYears: number) {
+function fmtPct(pct: number) {
+  return `${Number(pct) % 1 === 0 ? Number(pct) : Number(pct).toFixed(2).replace(/0+$/, '').replace(/\.$/, '')}%`
+}
+
+function getAgreementSections(athleteName: string, effectiveDate: string, termYears: number, commissionPct: number) {
   const d = fmtDate(effectiveDate)
   const t = `${termYears} year${termYears > 1 ? 's' : ''}`
+  const c = fmtPct(commissionPct)
   return [
     {
       title: '1. Purpose and Scope of Representation',
@@ -156,7 +162,7 @@ function getAgreementSections(athleteName: string, effectiveDate: string, termYe
     },
     {
       title: '6. Compensation',
-      content: `In consideration for Agent's services, Athlete agrees to pay Agent a commission of twenty percent (20%) of the gross value of all NIL compensation received by Athlete during the Term arising from deals arranged by, negotiated by, or through Agent. This commission is not tied to Athlete's athletic performance, playing contracts, scholarship status, or professional draft status. Agent's commission is earned at the time a NIL deal is executed. Athlete shall remit payment to Agent within fifteen (15) days of receipt of NIL compensation.`,
+      content: `In consideration for Agent's services, Athlete agrees to pay Agent a commission of ${c} of the gross value of all NIL compensation received by Athlete during the Term arising from deals arranged by, negotiated by, or through Agent. This commission is not tied to Athlete's athletic performance, playing contracts, scholarship status, or professional draft status. Agent's commission is earned at the time a NIL deal is executed. Athlete shall remit payment to Agent within fifteen (15) days of receipt of NIL compensation.`,
     },
     {
       title: '7. Athlete Approval Required',
@@ -210,7 +216,7 @@ export default function NILAgreement() {
   const [view, setView]                     = useState<View>('loading')
   const [pin, setPin]                       = useState('')
   const [pinError, setPinError]             = useState(false)
-  const [adminForm, setAdminForm]           = useState({ athleteName: '', effectiveDate: '', termYears: '1' })
+  const [adminForm, setAdminForm]           = useState({ athleteName: '', effectiveDate: '', termYears: '1', commissionPct: '20' })
   const [submittingAdmin, setSubmittingAdmin] = useState(false)
   const [adminError, setAdminError]         = useState('')
   const [agreement, setAgreement]           = useState<AgreementRow | null>(null)
@@ -295,6 +301,7 @@ export default function NILAgreement() {
           athleteName:   adminForm.athleteName,
           effectiveDate: adminForm.effectiveDate,
           termYears:     parseInt(adminForm.termYears),
+          commissionPct: parseFloat(adminForm.commissionPct),
         }),
       })
       const json = await res.json()
@@ -467,7 +474,7 @@ export default function NILAgreement() {
     doc.line(margin, y, W - margin, y)
     y += 7
 
-    for (const s of getAgreementSections(row.athlete_name, row.effective_date, row.term_years)) {
+    for (const s of getAgreementSections(row.athlete_name, row.effective_date, row.term_years, row.commission_pct)) {
       doc.setFont('helvetica', 'bold')
       doc.setFontSize(9.5)
       const tLines = doc.splitTextToSize(s.title, maxW)
@@ -572,6 +579,9 @@ export default function NILAgreement() {
                   <option value="2">2 Years</option>
                 </Select>
               </Field>
+              <Field label="Commission %">
+                <Input type="number" min="0.01" max="100" step="0.01" value={adminForm.commissionPct} onChange={e => setAdminForm(f => ({ ...f, commissionPct: e.target.value }))} placeholder="e.g. 20" required />
+              </Field>
               {adminError && <p style={{ color: '#f87171', fontSize: '0.8rem', marginBottom: '16px' }}>{adminError}</p>}
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
                 <Btn type="submit" disabled={submittingAdmin}>{submittingAdmin ? 'Generating…' : 'Generate Link →'}</Btn>
@@ -611,7 +621,7 @@ export default function NILAgreement() {
               <Btn type="button" onClick={() => { navigator.clipboard.writeText(signingLink); setCopied(true); setTimeout(() => setCopied(false), 2000) }}>
                 {copied ? 'Copied!' : 'Copy Link'}
               </Btn>
-              <Btn type="button" variant="ghost" onClick={() => { setAdminForm({ athleteName: '', effectiveDate: '', termYears: '1' }); setSigningLink(''); setView('admin-form') }}>
+              <Btn type="button" variant="ghost" onClick={() => { setAdminForm({ athleteName: '', effectiveDate: '', termYears: '1', commissionPct: '20' }); setSigningLink(''); setView('admin-form') }}>
                 Create Another
               </Btn>
             </div>
@@ -660,7 +670,7 @@ export default function NILAgreement() {
   }
 
   // ── Athlete signing view ──────────────────────────────────────────────────
-  const sections = getAgreementSections(agreement.athlete_name, agreement.effective_date, agreement.term_years)
+  const sections = getAgreementSections(agreement.athlete_name, agreement.effective_date, agreement.term_years, agreement.commission_pct)
 
   return (
     <section style={{ padding: '120px 0 80px' }}>
@@ -682,7 +692,7 @@ export default function NILAgreement() {
           <p style={{ fontFamily: 'Rajdhani, sans-serif', color: T.silver, fontSize: '0.75rem', letterSpacing: '0.12em', marginTop: '8px' }}>
             EFFECTIVE: {fmtDate(agreement.effective_date).toUpperCase()}
             {' · '}TERM: {agreement.term_years} YEAR{agreement.term_years > 1 ? 'S' : ''}
-            {' · '}COMPENSATION: 20% GROSS NIL
+            {' · '}COMPENSATION: {fmtPct(agreement.commission_pct)} GROSS NIL
             {' · '}GOVERNED BY LAWS OF MISSISSIPPI
           </p>
         </div>

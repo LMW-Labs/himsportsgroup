@@ -39,7 +39,7 @@ chrome:  #D8E8F4   (headings, bright text)
 - `inquiries` — contact form submissions (name, email, type, message)
 - `athletes` — athlete profiles (published, featured, slug, sport, position, photo_url, bio, social handles)
 - `articles` — news/blog (published, slug, title, excerpt, body, featured_image, author, published_at)
-- `nil_agreements` — NIL signing portal (athlete_name, effective_date, term_years, agreement_url_token, status, signature_data, signed_at, ip_address, athlete_email)
+- `nil_agreements` — NIL signing portal (athlete_name, effective_date, term_years, commission_pct, agreement_url_token, status, signature_data, signed_at, ip_address, athlete_email)
 
 ## Environment Variables
 ```
