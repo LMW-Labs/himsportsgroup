@@ -1,0 +1,12 @@
+---
+import PublicLayout from '../layouts/PublicLayout.astro'
+import VIPContacts from '../components/interactive/VIPContacts'
+---
+
+<PublicLayout
+  title="VIP Contacts | Hyche International Management Sports Group"
+  description="Private contact directory — Hyche International Management Sports Group."
+  noindex={true}
+>
+  <VIPContacts client:load />
+</PublicLayout>
