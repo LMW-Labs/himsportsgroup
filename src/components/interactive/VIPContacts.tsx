@@ -29,6 +29,13 @@ interface Contact {
 }
 
 type Mode = 'school' | 'name'
+type CoachTier = 'All Coaches' | 'College' | 'High School'
+
+/** category values that back each coach tier. */
+const COACH_TIER_CATEGORY: Record<Exclude<CoachTier, 'All Coaches'>, string> = {
+  'College':     'College Coach',
+  'High School': 'AAU / High School Coach',
+}
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 const displayName = (c: Contact) => (c.name_verified?.trim() || c.name).trim()
@@ -112,6 +119,8 @@ export default function VIPContacts() {
   const [mode, setMode]         = useState<Mode>('school')
   const [query, setQuery]       = useState('')
   const [role, setRole]         = useState('All')
+  const [coachTier, setCoachTier] = useState<CoachTier>('All Coaches')
+  const [status, setStatus]       = useState('All')
   const [selectedId, setSelected] = useState<string | null>(null)
 
   const [notesDraft, setNotesDraft] = useState('')
@@ -199,6 +208,9 @@ export default function VIPContacts() {
     const q = query.trim().toLowerCase()
     return contacts.filter(c => {
       if (role !== 'All' && c.contact_role !== role) return false
+      // Coach tier only narrows things while the Coach chip is the active role.
+      if (role === 'Coach' && coachTier !== 'All Coaches' && c.category !== COACH_TIER_CATEGORY[coachTier]) return false
+      if (status !== 'All' && c.update_status !== status) return false
       if (!q) return true
       return (
         displayName(c).toLowerCase().includes(q) ||
@@ -208,7 +220,16 @@ export default function VIPContacts() {
         (c.phone ?? '').includes(q)
       )
     })
-  }, [contacts, query, role])
+  }, [contacts, query, role, coachTier, status])
+
+  const coachTierCounts = useMemo(() => {
+    const coaches = contacts.filter(c => c.contact_role === 'Coach')
+    return {
+      'All Coaches': coaches.length,
+      'College':     coaches.filter(c => c.category === COACH_TIER_CATEGORY['College']).length,
+      'High School': coaches.filter(c => c.category === COACH_TIER_CATEGORY['High School']).length,
+    } as Record<CoachTier, number>
+  }, [contacts])
 
   const groups = useMemo(() => {
     if (mode === 'name') {
@@ -307,8 +328,19 @@ export default function VIPContacts() {
             value={query}
             onChange={e => setQuery(e.target.value)}
             placeholder="Search name, school, or phone…"
-            style={{ ...inputBase, flex: '1 1 260px', width: 'auto', padding: '10px 14px' }}
+            style={{ ...inputBase, flex: '1 1 220px', width: 'auto', padding: '10px 14px' }}
           />
+          <select
+            value={status}
+            onChange={e => setStatus(e.target.value)}
+            style={{ ...inputBase, width: 'auto', flex: '0 1 190px', padding: '10px 12px', cursor: 'pointer' }}
+          >
+            <option value="All">All statuses</option>
+            <option value="Moved">Moved / left school</option>
+            <option value="Confirmed">Still there</option>
+            <option value="Manual Review">Needs review</option>
+            <option value="Not Updated">Not yet checked</option>
+          </select>
         </div>
 
         {/* Role filter */}
@@ -331,6 +363,46 @@ export default function VIPContacts() {
             </button>
           ))}
         </div>
+
+        {/* Coach tier — only meaningful while Coach is the active role */}
+        {role === 'Coach' && (
+          <div style={{
+            display: 'flex', gap: '20px', flexWrap: 'wrap', alignItems: 'center',
+            background: T.surface, border: `1px solid ${T.borderFaint}`, borderRadius: '6px',
+            padding: '12px 16px', marginBottom: '20px',
+          }}>
+            {(['All Coaches', 'College', 'High School'] as CoachTier[]).map(t => (
+              <label
+                key={t}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer',
+                  fontFamily: 'Rajdhani, sans-serif', fontWeight: 600, fontSize: '0.82rem',
+                  letterSpacing: '0.06em', textTransform: 'uppercase',
+                  color: coachTier === t ? T.chrome : T.silver,
+                  padding: '4px 0',
+                }}
+              >
+                <input
+                  type="radio"
+                  name="coach-tier"
+                  checked={coachTier === t}
+                  onChange={() => setCoachTier(t)}
+                  style={{ position: 'absolute', opacity: 0, width: 0, height: 0 }}
+                />
+                <span style={{
+                  width: '15px', height: '15px', borderRadius: '50%', flexShrink: 0,
+                  border: `2px solid ${coachTier === t ? T.brand : T.border}`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  {coachTier === t && (
+                    <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: T.brand }} />
+                  )}
+                </span>
+                {t} <span style={{ opacity: 0.6, fontWeight: 400 }}>{coachTierCounts[t]}</span>
+              </label>
+            ))}
+          </div>
+        )}
 
         {loadError && (
           <p style={{ color: T.accent, fontFamily: 'DM Sans, sans-serif', fontSize: '13px', marginBottom: '16px' }}>{loadError}</p>
@@ -401,6 +473,19 @@ export default function VIPContacts() {
                 <p style={{ fontFamily: 'Rajdhani, sans-serif', fontSize: '0.78rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: statusColor(selected.update_status), marginBottom: '22px' }}>
                   {selected.update_status}
                 </p>
+
+                {selected.update_status === 'Moved' && (
+                  <div style={{
+                    background: 'rgba(200,80,16,0.1)', border: `1px solid ${T.accent}`,
+                    borderRadius: '5px', padding: '14px 16px', marginBottom: '22px',
+                  }}>
+                    <div style={{ ...label, color: T.accent, marginBottom: '6px' }}>Left their old school</div>
+                    <div style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '14px', color: T.chrome, lineHeight: 1.6 }}>
+                      Was at <strong>{selected.organization}</strong> when this list was built.
+                      {' '}Now: <strong>{selected.current_org}</strong>
+                    </div>
+                  </div>
+                )}
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: '16px', marginBottom: '26px' }}>
                   <Detail label="Phone">
