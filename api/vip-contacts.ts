@@ -59,14 +59,28 @@ export default async function handler(request: Request): Promise<Response> {
 
   // ── Read: full contact list ────────────────────────────────────────────────
   if (body.action === 'list') {
-    const res = await fetch(
-      `${supabaseUrl}/rest/v1/hims_vip_contacts?select=${SELECT_COLS}&order=name.asc`,
-      { headers },
-    )
-    if (!res.ok) {
+    // Published athletes ride along so the Roster template can merge a real
+    // name and position instead of a placeholder.
+    const [contactsRes, athletesRes] = await Promise.all([
+      fetch(
+        `${supabaseUrl}/rest/v1/hims_vip_contacts?select=${SELECT_COLS}&order=name.asc`,
+        { headers },
+      ),
+      fetch(
+        `${supabaseUrl}/rest/v1/athletes?select=name,position&published=is.true&order=featured.desc,name.asc`,
+        { headers },
+      ),
+    ])
+
+    if (!contactsRes.ok) {
       return json({ error: 'Failed to load contacts' }, 500)
     }
-    return json({ contacts: await res.json() })
+
+    return json({
+      contacts: await contactsRes.json(),
+      // A roster failure should not block the directory itself.
+      athletes: athletesRes.ok ? await athletesRes.json() : [],
+    })
   }
 
   // ── Write: notes only ──────────────────────────────────────────────────────

@@ -28,6 +28,11 @@ interface Contact {
   notes: string | null
 }
 
+interface Athlete {
+  name: string
+  position: string | null
+}
+
 type Mode = 'school' | 'name'
 type CoachTier = 'All Coaches' | 'College' | 'High School'
 
@@ -57,6 +62,8 @@ function lastName(c: Contact): string {
   return parts.length ? parts[parts.length - 1] : cleaned
 }
 
+const IG_HANDLE = '@himsportsgrp'
+
 interface Template {
   key:   string
   hint:  string
@@ -70,25 +77,25 @@ const TEMPLATES: Template[] = [
     key:  'Intro',
     hint: 'First contact — who Chris is',
     build: c =>
-      `Coach ${lastName(c)} — Chris Hyche with HIM Sports Group. We handle NIL and representation for a group of basketball players, and I wanted to introduce myself directly. If you're building your board this cycle, I'd like to send you what we have. Is this the best number for you?`,
+      `Coach ${lastName(c)} — Chris Hyche with HIM Sports Group. We handle NIL and representation for a group of basketball players, and I wanted to introduce myself directly. If you're building your board this cycle, I'd like to send you what we have. Roster's on IG ${IG_HANDLE} if you want a look first. Is this the best number for you?`,
   },
   {
     key:  'New Job',
     hint: 'Congrats on the move — for coaches who changed schools',
     build: c =>
-      `Coach ${lastName(c)} — Chris Hyche, HIM Sports Group. Congratulations on the move to ${schoolOf(c)}. Well deserved. Once you're past the first wave of hires and filling out the roster, I'd like to send over the guys we represent. No rush — just putting it on your radar.`,
+      `Coach ${lastName(c)} — Chris Hyche, HIM Sports Group. Congratulations on the move to ${schoolOf(c)}. Well deserved. Once you're past the first wave of hires and filling out the roster, I'd like to send over the guys we represent. Roster's on IG ${IG_HANDLE} whenever you want a look. No rush — just putting it on your radar.`,
   },
   {
     key:  'Roster',
     hint: 'Pitching a specific player',
     build: c =>
-      `Coach ${lastName(c)} — Chris Hyche with HIM Sports Group. Sending over {player} for your consideration, {position}. I think the fit with what you run at ${schoolOf(c)} is worth a look. Happy to get you film and academics today.`,
+      `Coach ${lastName(c)} — Chris Hyche with HIM Sports Group. Sending over {player} for your consideration, {position}. I think the fit with what you run at ${schoolOf(c)} is worth a look. Happy to get you film and academics today. More on IG ${IG_HANDLE}.`,
   },
   {
     key:  'Portal',
     hint: 'Transfer portal window is open',
     build: c =>
-      `Coach ${lastName(c)} — Chris Hyche, HIM Sports Group. Portal's open and we have guys who will be moving. Before it gets loud, wanted to give you first look at who we represent. Want me to send the list over?`,
+      `Coach ${lastName(c)} — Chris Hyche, HIM Sports Group. Portal's open and we have guys who will be moving. Before it gets loud, wanted to give you first look at who we represent. Roster's on IG ${IG_HANDLE}. Want me to send the list over?`,
   },
   {
     key:  'Reconnect',
@@ -170,6 +177,7 @@ export default function VIPContacts() {
   const [checking, setChecking] = useState(false)
 
   const [contacts, setContacts] = useState<Contact[]>([])
+  const [athletes, setAthletes] = useState<Athlete[]>([])
   const [loadError, setLoadError] = useState('')
 
   const [mode, setMode]         = useState<Mode>('school')
@@ -178,6 +186,7 @@ export default function VIPContacts() {
   const [coachTier, setCoachTier] = useState<CoachTier>('All Coaches')
   const [status, setStatus]       = useState('All')
   const [templateKey, setTemplateKey] = useState('')
+  const [playerName, setPlayerName]   = useState('')
   const [msgCopied, setMsgCopied]     = useState(false)
   const [selectedId, setSelected] = useState<string | null>(null)
 
@@ -211,9 +220,10 @@ export default function VIPContacts() {
       }
       if (!res.ok) { setLoadError('Could not load contacts. Try again.'); setAuthed(true); return }
 
-      const data: { contacts: Contact[] } = await res.json()
+      const data: { contacts: Contact[]; athletes?: Athlete[] } = await res.json()
       sessionStorage.setItem(PIN_KEY, candidate)
       setContacts(data.contacts)
+      setAthletes(data.athletes ?? [])
       setAuthed(true)
     } catch {
       setPinError('Network error. Try again.')
@@ -227,6 +237,7 @@ export default function VIPContacts() {
     setNotesDraft(c.notes ?? '')
     setSaveMsg('')
     setTemplateKey('')
+    setPlayerName('')
     setMsgCopied(false)
   }
 
@@ -580,10 +591,35 @@ export default function VIPContacts() {
                   {(() => {
                     const tpl = TEMPLATES.find(t => t.key === templateKey)
                     if (!tpl) return null
-                    const msg = tpl.build(selected)
+
+                    const raw = tpl.build(selected)
+                    const needsPlayer = raw.includes('{player}')
+                    const picked = athletes.find(a => a.name === playerName)
+                    const msg = picked
+                      ? raw.replace(/\{player\}/g, picked.name)
+                           .replace(/\{position\}/g, picked.position || 'guard')
+                      : raw
                     const digits = (selected.phone ?? '').replace(/[^0-9+]/g, '')
+
                     return (
                       <div style={{ marginTop: '14px' }}>
+                        {needsPlayer && athletes.length > 0 && (
+                          <div style={{ marginBottom: '12px' }}>
+                            <div style={{ ...label, marginBottom: '6px' }}>Which player</div>
+                            <select
+                              value={playerName}
+                              onChange={e => { setPlayerName(e.target.value); setMsgCopied(false) }}
+                              style={{ ...inputBase, cursor: 'pointer' }}
+                            >
+                              <option value="">Choose a player…</option>
+                              {athletes.map(a => (
+                                <option key={a.name} value={a.name}>
+                                  {a.name}{a.position ? ` — ${a.position}` : ''}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        )}
                         <div style={{
                           background: T.bg, border: `1px solid ${T.border}`, borderRadius: '4px',
                           padding: '14px 16px',
