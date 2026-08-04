@@ -48,6 +48,62 @@ function schoolOf(c: Contact): string {
   return raw.replace(/\s*\(.*$/, '').trim() || 'Unknown'
 }
 
+const NAME_SUFFIXES = new Set(['jr', 'jr.', 'sr', 'sr.', 'ii', 'iii', 'iv'])
+
+/** Coaches get addressed by surname — "Coach Hamilton", not "Coach A.W." */
+function lastName(c: Contact): string {
+  const cleaned = displayName(c).replace(/\s*\(.*$/, '').replace(/["']/g, '').trim()
+  const parts = cleaned.split(/\s+/).filter(p => p && !NAME_SUFFIXES.has(p.toLowerCase()))
+  return parts.length ? parts[parts.length - 1] : cleaned
+}
+
+interface Template {
+  key:   string
+  hint:  string
+  build: (c: Contact) => string
+}
+
+// Cold outreach from Chris Hyche / HIM Sports Group. {player} and {position}
+// stay as placeholders — which athlete he pitches depends on the coach.
+const TEMPLATES: Template[] = [
+  {
+    key:  'Intro',
+    hint: 'First contact — who Chris is',
+    build: c =>
+      `Coach ${lastName(c)} — Chris Hyche with HIM Sports Group. We handle NIL and representation for a group of basketball players, and I wanted to introduce myself directly. If you're building your board this cycle, I'd like to send you what we have. Is this the best number for you?`,
+  },
+  {
+    key:  'New Job',
+    hint: 'Congrats on the move — for coaches who changed schools',
+    build: c =>
+      `Coach ${lastName(c)} — Chris Hyche, HIM Sports Group. Congratulations on the move to ${schoolOf(c)}. Well deserved. Once you're past the first wave of hires and filling out the roster, I'd like to send over the guys we represent. No rush — just putting it on your radar.`,
+  },
+  {
+    key:  'Roster',
+    hint: 'Pitching a specific player',
+    build: c =>
+      `Coach ${lastName(c)} — Chris Hyche with HIM Sports Group. Sending over {player} for your consideration, {position}. I think the fit with what you run at ${schoolOf(c)} is worth a look. Happy to get you film and academics today.`,
+  },
+  {
+    key:  'Portal',
+    hint: 'Transfer portal window is open',
+    build: c =>
+      `Coach ${lastName(c)} — Chris Hyche, HIM Sports Group. Portal's open and we have guys who will be moving. Before it gets loud, wanted to give you first look at who we represent. Want me to send the list over?`,
+  },
+  {
+    key:  'Reconnect',
+    hint: 'Long-standing relationship — no pitch',
+    build: c =>
+      `Coach ${lastName(c)} — Chris Hyche, HIM Sports Group. Been a while. Hope the family is doing well. I'm running NIL and representation on the basketball side now. Would like to catch up when you have ten minutes — not a pitch, just want to reconnect.`,
+  },
+  {
+    key:  'Follow Up',
+    hint: 'Nudge after no reply',
+    build: c =>
+      `Coach ${lastName(c)} — Chris Hyche, HIM Sports Group, following up on my last note. I know it's a busy stretch. If now isn't the time, tell me when to circle back and I'll respect that.`,
+  },
+]
+
 const statusColor = (s: string) =>
   s === 'Confirmed' ? '#3FB950'
   : s === 'Moved' ? T.accent
@@ -121,6 +177,8 @@ export default function VIPContacts() {
   const [role, setRole]         = useState('All')
   const [coachTier, setCoachTier] = useState<CoachTier>('All Coaches')
   const [status, setStatus]       = useState('All')
+  const [templateKey, setTemplateKey] = useState('')
+  const [msgCopied, setMsgCopied]     = useState(false)
   const [selectedId, setSelected] = useState<string | null>(null)
 
   const [notesDraft, setNotesDraft] = useState('')
@@ -168,6 +226,8 @@ export default function VIPContacts() {
     setSelected(c.id)
     setNotesDraft(c.notes ?? '')
     setSaveMsg('')
+    setTemplateKey('')
+    setMsgCopied(false)
   }
 
   async function saveNotes() {
@@ -501,6 +561,72 @@ export default function VIPContacts() {
                   {selected.name_verified && selected.name_verified !== selected.name && (
                     <Detail label="Name On List">{selected.name}</Detail>
                   )}
+                </div>
+
+                {/* SMS templates */}
+                <div style={{ borderTop: `1px solid ${T.borderFaint}`, paddingTop: '20px', marginBottom: '24px' }}>
+                  <div style={{ ...label, marginBottom: '8px' }}>Text Message Template</div>
+                  <select
+                    value={templateKey}
+                    onChange={e => { setTemplateKey(e.target.value); setMsgCopied(false) }}
+                    style={{ ...inputBase, cursor: 'pointer' }}
+                  >
+                    <option value="">Choose a message…</option>
+                    {TEMPLATES.map(t => (
+                      <option key={t.key} value={t.key}>{t.key} — {t.hint}</option>
+                    ))}
+                  </select>
+
+                  {(() => {
+                    const tpl = TEMPLATES.find(t => t.key === templateKey)
+                    if (!tpl) return null
+                    const msg = tpl.build(selected)
+                    const digits = (selected.phone ?? '').replace(/[^0-9+]/g, '')
+                    return (
+                      <div style={{ marginTop: '14px' }}>
+                        <div style={{
+                          background: T.bg, border: `1px solid ${T.border}`, borderRadius: '4px',
+                          padding: '14px 16px',
+                          fontFamily: 'DM Sans, sans-serif', fontSize: '14px',
+                          color: T.chrome, lineHeight: 1.7, whiteSpace: 'pre-wrap',
+                        }}>
+                          {msg}
+                        </div>
+                        <div style={{
+                          fontFamily: 'DM Sans, sans-serif', fontSize: '11.5px',
+                          color: T.silver, marginTop: '6px',
+                        }}>
+                          {msg.length} characters{msg.length > 160 ? ` · ${Math.ceil(msg.length / 153)} SMS segments` : ''}
+                          {msg.includes('{') && ' · fill in the {placeholders} before sending'}
+                        </div>
+                        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginTop: '12px' }}>
+                          <Btn
+                            type="button"
+                            onClick={() => {
+                              navigator.clipboard.writeText(msg)
+                              setMsgCopied(true)
+                              setTimeout(() => setMsgCopied(false), 2000)
+                            }}
+                          >
+                            {msgCopied ? 'Copied!' : 'Copy Message'}
+                          </Btn>
+                          {digits && (
+                            <a
+                              href={`sms:${digits}?&body=${encodeURIComponent(msg)}`}
+                              style={{
+                                fontFamily: 'Rajdhani, sans-serif', fontWeight: 700, fontSize: '0.82rem',
+                                letterSpacing: '0.1em', textTransform: 'uppercase',
+                                padding: '11px 22px', borderRadius: '4px', textDecoration: 'none',
+                                background: 'transparent', border: `1px solid ${T.border}`, color: T.silver,
+                              }}
+                            >
+                              Open in Messages
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    )
+                  })()}
                 </div>
 
                 <div style={{ borderTop: `1px solid ${T.borderFaint}`, paddingTop: '20px' }}>
