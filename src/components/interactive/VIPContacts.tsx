@@ -21,6 +21,7 @@ interface Contact {
   organization: string
   current_org: string | null
   phone: string | null
+  contact_role: string
   category: string
   years_known: string | null
   update_status: string
@@ -110,6 +111,7 @@ export default function VIPContacts() {
 
   const [mode, setMode]         = useState<Mode>('school')
   const [query, setQuery]       = useState('')
+  const [role, setRole]         = useState('All')
   const [selectedId, setSelected] = useState<string | null>(null)
 
   const [notesDraft, setNotesDraft] = useState('')
@@ -186,16 +188,27 @@ export default function VIPContacts() {
   }
 
   // ── Filtering + grouping ────────────────────────────────────────────────────
+  /** Roles present in the data, most common first, so the chip row reflects reality. */
+  const roleCounts = useMemo(() => {
+    const counts = new Map<string, number>()
+    for (const c of contacts) counts.set(c.contact_role, (counts.get(c.contact_role) ?? 0) + 1)
+    return [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+  }, [contacts])
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
-    if (!q) return contacts
-    return contacts.filter(c =>
-      displayName(c).toLowerCase().includes(q) ||
-      c.organization.toLowerCase().includes(q) ||
-      (c.current_org ?? '').toLowerCase().includes(q) ||
-      (c.phone ?? '').includes(q),
-    )
-  }, [contacts, query])
+    return contacts.filter(c => {
+      if (role !== 'All' && c.contact_role !== role) return false
+      if (!q) return true
+      return (
+        displayName(c).toLowerCase().includes(q) ||
+        c.organization.toLowerCase().includes(q) ||
+        (c.current_org ?? '').toLowerCase().includes(q) ||
+        (c.contact_role ?? '').toLowerCase().includes(q) ||
+        (c.phone ?? '').includes(q)
+      )
+    })
+  }, [contacts, query, role])
 
   const groups = useMemo(() => {
     if (mode === 'name') {
@@ -298,6 +311,27 @@ export default function VIPContacts() {
           />
         </div>
 
+        {/* Role filter */}
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '20px' }}>
+          {[['All', contacts.length] as [string, number], ...roleCounts].map(([r, n]) => (
+            <button
+              key={r}
+              onClick={() => setRole(r)}
+              style={{
+                fontFamily: 'Rajdhani, sans-serif', fontWeight: 600, fontSize: '0.74rem',
+                letterSpacing: '0.08em', textTransform: 'uppercase',
+                padding: '7px 13px', borderRadius: '999px', cursor: 'pointer',
+                background: role === r ? 'rgba(200,80,16,0.16)' : 'transparent',
+                border: `1px solid ${role === r ? T.accent : T.border}`,
+                color: role === r ? T.accent : T.silver,
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {r} <span style={{ opacity: 0.65 }}>{n}</span>
+            </button>
+          ))}
+        </div>
+
         {loadError && (
           <p style={{ color: T.accent, fontFamily: 'DM Sans, sans-serif', fontSize: '13px', marginBottom: '16px' }}>{loadError}</p>
         )}
@@ -345,7 +379,7 @@ export default function VIPContacts() {
                       {c.notes && <span title="Has notes" style={{ color: T.accent, fontSize: '11px' }}>●</span>}
                     </div>
                     <div style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '11.5px', color: T.silver, marginTop: '3px', paddingLeft: '13px' }}>
-                      {mode === 'school' ? c.category : schoolOf(c)}
+                      {mode === 'school' ? c.contact_role : `${c.contact_role} · ${schoolOf(c)}`}
                     </div>
                   </button>
                 ))}
@@ -376,6 +410,7 @@ export default function VIPContacts() {
                   </Detail>
                   <Detail label="Currently">{selected.current_org || '—'}</Detail>
                   <Detail label="On Original List">{selected.organization}</Detail>
+                  <Detail label="Role">{selected.contact_role}</Detail>
                   <Detail label="Category">{selected.category}</Detail>
                   <Detail label="Years Known">{selected.years_known || '—'}</Detail>
                   {selected.name_verified && selected.name_verified !== selected.name && (

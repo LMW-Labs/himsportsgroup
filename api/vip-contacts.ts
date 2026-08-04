@@ -11,6 +11,7 @@ const SELECT_COLS = [
   'organization',
   'current_org',
   'phone',
+  'contact_role',
   'category',
   'years_known',
   'update_status',
