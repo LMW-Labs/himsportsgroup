@@ -1,0 +1,17 @@
+---
+import PublicLayout from '../layouts/PublicLayout.astro'
+import AdminDashboard from '../components/interactive/AdminDashboard'
+---
+
+<PublicLayout
+  title="Admin | HIMS"
+  description="Internal CRM dashboard"
+  noindex={true}
+>
+  <AdminDashboard client:load />
+</PublicLayout>
+
+<style>
+  /* Remove default page padding so the dashboard fills the viewport */
+  main { padding: 0 !important; max-width: none !important; }
+</style>
