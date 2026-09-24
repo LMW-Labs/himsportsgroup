@@ -4,12 +4,8 @@ import { getAthletes, getAthleteBySlug } from '../../lib/supabase/queries'
 import type { Athlete } from '../../lib/supabase/types'
 
 export async function getStaticPaths() {
-  let athletes: Athlete[] = []
-  try {
-    athletes = await getAthletes()
-  } catch {
-    // No athletes yet — build with empty set
-  }
+  // Supabase errors fail the build so the last good deployment stays live
+  const athletes: Athlete[] = await getAthletes()
   return athletes.map(a => ({ params: { slug: a.slug }, props: { athlete: a } }))
 }
 

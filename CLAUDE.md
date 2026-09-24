@@ -72,6 +72,11 @@ RESEND_API_KEY              — Resend API key for transactional email
 2. Add `gc-logo.png` to `/public/` (Nav falls back to text currently)
 3. Align stats across: HeroSection.tsx (5 athletes), contact.astro sidebar (50+), athletes/nil.astro ($12M+)
 
+## Outage Runbook
+- **Maintenance page**: `middleware.ts` serves `public/maintenance.html` (503) for all pages when Edge Config item `maintenance` is `true` (instant) or env `MAINTENANCE_MODE=on` (needs redeploy). `/api/*` stays up. Bypass with `?bypass=<MAINTENANCE_BYPASS>`.
+- **Build guard**: roster/news pages throw on Supabase errors (and an empty basketball roster in production) so a bad build fails and Vercel keeps the last good deployment live. Set `ALLOW_EMPTY_ROSTER=1` if an empty roster is intentional.
+- **Supabase paused** (free tier idles out after ~7 days): `api/keepalive.ts` runs daily via Vercel Cron to prevent it. If it still pauses, restore in Supabase dashboard, then redeploy.
+- **Bad deploy live**: Vercel → Deployments → pick the last good Production deployment → Instant Rollback. Never "Redeploy" an old deployment — it rebuilds old code.
 ## NIL Agreement Flow
 - No token in URL → admin PIN view → admin form → Supabase insert via `/api/create-agreement` → copy signing link
 - Token in URL → load from Supabase → athlete reads agreement, signs canvas, submits → PDF generated client-side → email sent with PDF attachment via `/api/send-email`

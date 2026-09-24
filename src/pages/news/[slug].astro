@@ -4,12 +4,8 @@ import { getArticles, getArticleBySlug } from '../../lib/supabase/queries'
 import type { Article } from '../../lib/supabase/types'
 
 export async function getStaticPaths() {
-  let articles: Article[] = []
-  try {
-    articles = await getArticles()
-  } catch {
-    // No articles yet
-  }
+  // Supabase errors fail the build so the last good deployment stays live
+  const articles: Article[] = await getArticles()
   return articles.map(a => ({ params: { slug: a.slug }, props: { article: a } }))
 }
 

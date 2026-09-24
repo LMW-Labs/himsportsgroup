@@ -3,5 +3,8 @@
     "api/telegram.js": {
       "maxDuration": 30
     }
-  }
+  },
+  "crons": [
+    { "path": "/api/keepalive", "schedule": "0 12 * * *" }
+  ]
 }

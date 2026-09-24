@@ -3,12 +3,9 @@ import PublicLayout from '../../layouts/PublicLayout.astro'
 import { getArticles } from '../../lib/supabase/queries'
 import type { Article } from '../../lib/supabase/types'
 
-let articles: Article[] = []
-try {
-  articles = await getArticles()
-} catch {
-  // No articles yet or Supabase unreachable at build time
-}
+// Supabase errors fail the build so the last good deployment stays live.
+// Zero articles (none published yet) still renders the empty state.
+const articles: Article[] = await getArticles()
 
 const featured = articles[0] ?? null
 const rest = articles.slice(1)

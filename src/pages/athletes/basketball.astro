@@ -3,11 +3,11 @@ import PublicLayout from '../../layouts/PublicLayout.astro'
 import { getAthletesBySport } from '../../lib/supabase/queries'
 import type { Athlete } from '../../lib/supabase/types'
 
-let athletes: Athlete[] = []
-try {
-  athletes = await getAthletesBySport('basketball')
-} catch {
-  // No athletes yet or Supabase unreachable at build time
+// Supabase errors fail the build on purpose: Vercel then keeps the last good
+// deployment live instead of shipping a roster with no players.
+const athletes: Athlete[] = await getAthletesBySport('basketball')
+if (athletes.length === 0 && process.env.VERCEL_ENV === 'production' && !process.env.ALLOW_EMPTY_ROSTER) {
+  throw new Error('Basketball roster came back empty — refusing to deploy. Set ALLOW_EMPTY_ROSTER=1 if intentional.')
 }
 
 function formatHeight(inches: number | null): string | null {
