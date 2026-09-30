@@ -75,18 +75,18 @@ const players = athletes.map(a => ({
           {players.map((player, i) => (
             <a href={`/athletes/${player.slug}`} class="player-card reveal" style={`--delay:${(i % 4) * 0.08}s`}>
               <div class="card-accent-line" aria-hidden="true"></div>
-              <div class="card-number">{String(i + 1).padStart(2, '0')}</div>
-              {player.photo ? (
-                <img class="card-photo" src={player.photo} alt={player.name} loading="lazy" />
-              ) : (
-                <div class="card-photo card-photo-placeholder" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.5"/>
-                    <path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                  </svg>
-                </div>
-              )}
-              <div class="card-scrim" aria-hidden="true"></div>
+              <div class="card-art">
+                {player.photo ? (
+                  <img class="card-photo" src={player.photo} alt={player.name} loading="lazy" />
+                ) : (
+                  <div class="card-photo card-photo-placeholder" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.5"/>
+                      <path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                  </div>
+                )}
+              </div>
               <div class="card-body">
                 {player.position && (
                   <div class="player-meta">
@@ -260,9 +260,8 @@ const players = athletes.map(a => ({
     gap: 2px;
   }
   .player-card {
-    display: block;
+    display: flex; flex-direction: column;
     position: relative; overflow: hidden;
-    aspect-ratio: 5 / 7;
     background-color: var(--color-surface);
     border: 1px solid rgba(168,189,208,0.07);
     text-decoration: none; color: inherit;
@@ -282,12 +281,10 @@ const players = athletes.map(a => ({
     z-index: 3;
   }
   .player-card:hover .card-accent-line { transform: scaleX(1); }
-  .card-number {
-    position: absolute; top: 16px; left: 20px; z-index: 3;
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 0.85rem; letter-spacing: 0.12em;
-    color: rgba(255,255,255,0.6);
-    text-shadow: 0 1px 6px rgba(0,0,0,0.7);
+  /* Matches the 928×1152 HIM "Official 2026" card art so it shows uncropped */
+  .card-art {
+    position: relative; overflow: hidden;
+    aspect-ratio: 928 / 1152;
   }
   .card-photo {
     position: absolute; inset: 0;
@@ -302,14 +299,9 @@ const players = athletes.map(a => ({
     color: rgba(168,189,208,0.25);
   }
   .card-photo-placeholder svg { width: 25%; height: 25%; max-width: 64px; max-height: 64px; }
-  .card-scrim {
-    position: absolute; inset: 0; z-index: 1;
-    background: linear-gradient(180deg, rgba(10,12,16,0) 38%, rgba(10,12,16,0.6) 70%, rgba(10,12,16,0.96) 100%);
-  }
   .card-body {
-    position: absolute; left: 0; right: 0; bottom: 0; z-index: 2;
     display: flex; flex-direction: column; gap: 6px;
-    padding: 18px 20px 20px;
+    padding: 14px 18px 18px;
   }
   .player-meta {
     display: flex; align-items: center; gap: 12px;
@@ -330,7 +322,7 @@ const players = athletes.map(a => ({
   }
   .player-name {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(26px, 3vw, 36px);
+    font-size: clamp(22px, 2.4vw, 28px);
     line-height: 0.95; letter-spacing: 0.02em;
     color: var(--color-chrome);
   }
