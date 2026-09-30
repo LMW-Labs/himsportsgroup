@@ -1,34 +1,100 @@
 ---
 import PublicLayout from '../../layouts/PublicLayout.astro'
+
+const team = [
+  {
+    name: 'Jermaine Warmack',
+    role: 'Player Development & Sports Agent',
+    location: 'Orange, New Jersey',
+    photoUrl: '/jermaine-warmack.jpg',
+    highlights: [
+      { value: '1,626', label: 'Career HS Points' },
+      { value: '3 Yrs', label: 'Harlem Globetrotters' },
+      { value: 'HOF', label: 'Orange High School' },
+    ],
+    bio: [
+      'Jermaine Warmack is a basketball professional and sports agent whose career spans high-level playing experience, player development, and a deep network across the game.',
+      "One of the standout point guards to come out of New Jersey, Warmack scored over 1,000 points at both the high school and Division I collegiate levels, and remains Orange High School's all-time leading male scorer with 1,626 career points — earning him induction into the school's Hall of Fame. He went on to play professionally with the Harlem Globetrotters for three years, performing internationally and gaining firsthand understanding of branding and the business side of basketball.",
+      'Today, Warmack serves as an agent and player development lead with Hyche International Management, working at the intersection of skill development and athlete representation. His approach centers on leadership, discipline, accountability, and branding — helping athletes build both their game and their career, with an eye toward long-term positioning on and off the court.',
+      'As he continues to grow his footprint in the basketball industry, Jermaine Warmack remains committed to developing talent, building opportunities, and representing athletes with integrity, experience, and a player-first approach.',
+    ],
+  },
+  {
+    name: 'Austin Wyrick',
+    role: 'Fractional CTO',
+    location: null,
+    photoUrl: '/austin-wyrick.jpg',
+    highlights: [],
+    bio: [
+      "Austin Wyrick is fractional CTO at Hyche International Management (HIM Sports Group), where he built the company's roster and agreements platform and now leads its systems. He runs LMW Labs, an independent software practice, and spent fifteen years in logistics operations before building software full-time.",
+    ],
+  },
+]
 ---
 
 <PublicLayout
   title="Our Team | Hyche International Management"
   description="The team at Hyche International Management — boutique NIL representation agency founded by Chris Hyche."
 >
-  <main class="coming-main">
-    <div class="coming-inner">
-      <p class="eyebrow">Our Team · Coming Soon</p>
-      <h1 class="headline">More Faces<br/>Coming Soon.</h1>
-      <p class="body">
-        Hyche International Management is currently led by founder Chris Hyche, with more team members joining as we grow. Meet Chris on our About page.
+  <main class="team-main">
+    <header class="team-header">
+      <p class="eyebrow">Our Team</p>
+      <h1 class="headline">The People Behind<br/>Our Athletes.</h1>
+      <p class="intro">
+        Founded by former Harlem Globetrotter Chris Hyche, our team brings real playing experience and a player-first approach to every client we represent.
       </p>
-      <a href="/about" class="cta-btn">Meet Chris →</a>
+    </header>
+
+    <a href="/about" class="founder-card">
+      <img src="/hyche_portrait.png" alt="Chris Hyche" class="founder-photo" />
+      <div>
+        <p class="member-role">Founder &amp; CEO</p>
+        <h2 class="founder-name">Chris Hyche</h2>
+        <span class="founder-link">Read Chris's story →</span>
+      </div>
+    </a>
+
+    {team.map((m) => (
+      <article class="member">
+        <div class="member-photo-wrap">
+          <img src={m.photoUrl} alt={m.name} class="member-photo" loading="lazy" />
+          {m.highlights.length > 0 && (
+            <div class="highlights">
+              {m.highlights.map((h) => (
+                <div class="highlight">
+                  <span class="highlight-value">{h.value}</span>
+                  <span class="highlight-label">{h.label}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        <div class="member-body">
+          <p class="member-role">{m.role}</p>
+          <h2 class="member-name">{m.name}</h2>
+          {m.location ? <p class="member-location">{m.location}</p> : <div class="member-spacer" />}
+          {m.bio.map((p) => <p class="member-bio">{p}</p>)}
+        </div>
+      </article>
+    ))}
+
+    <div class="more">
+      <p class="more-text">More faces coming soon as we grow.</p>
+      <a href="/contact" class="cta-btn">Work With Us →</a>
     </div>
   </main>
 </PublicLayout>
 
 <style>
-  .coming-main {
-    min-height: 80vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 120px 24px;
+  .team-main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 140px 24px 100px;
   }
-  .coming-inner {
-    max-width: 560px;
+  .team-header {
     text-align: center;
+    max-width: 640px;
+    margin: 0 auto 56px;
   }
   .eyebrow {
     font-family: 'Rajdhani', sans-serif;
@@ -46,12 +112,139 @@ import PublicLayout from '../../layouts/PublicLayout.astro'
     color: var(--color-chrome);
     margin-bottom: 24px;
   }
-  .body {
+  .intro {
     font-family: 'DM Sans', sans-serif;
     font-size: 17px;
     color: var(--color-silver);
     line-height: 1.75;
-    margin-bottom: 32px;
+  }
+
+  .founder-card {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    max-width: 520px;
+    margin: 0 auto 64px;
+    padding: 20px 24px;
+    background: #0E1220;
+    border: 1px solid rgba(168,189,208,0.12);
+    border-radius: 8px;
+    text-decoration: none;
+    transition: border-color 150ms;
+  }
+  .founder-card:hover { border-color: rgba(26,114,232,0.5); }
+  .founder-photo {
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    object-fit: cover;
+    object-position: top;
+    flex-shrink: 0;
+  }
+  .founder-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    line-height: 1;
+    color: var(--color-chrome);
+    margin: 4px 0 8px;
+  }
+  .founder-link {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 0.8rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #1A72E8;
+  }
+
+  .member {
+    display: grid;
+    grid-template-columns: minmax(0, 380px) 1fr;
+    gap: clamp(32px, 5vw, 64px);
+    align-items: start;
+    padding: clamp(24px, 4vw, 48px);
+    background: #0E1220;
+    border: 1px solid rgba(168,189,208,0.12);
+    border-radius: 8px;
+  }
+  .member + .member { margin-top: 32px; }
+  .member-spacer { height: 20px; }
+  .member-photo {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 6px;
+    display: block;
+  }
+  .highlights {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .highlight {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 12px 6px;
+    background: #0A0C10;
+    border-radius: 4px;
+  }
+  .highlight-value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 26px;
+    line-height: 1;
+    color: var(--color-chrome);
+  }
+  .highlight-label {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    font-size: 0.66rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-silver);
+    margin-top: 4px;
+  }
+  .member-role {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 0.72rem;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+  }
+  .member-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(40px, 4vw, 56px);
+    line-height: 1;
+    color: var(--color-chrome);
+    margin: 8px 0 4px;
+  }
+  .member-location {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    font-size: 0.9rem;
+    letter-spacing: 0.08em;
+    color: #1A72E8;
+    margin-bottom: 24px;
+  }
+  .member-bio {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    color: var(--color-silver);
+    line-height: 1.75;
+    margin-bottom: 16px;
+  }
+
+  .more {
+    text-align: center;
+    margin-top: 64px;
+  }
+  .more-text {
+    font-family: 'DM Sans', sans-serif;
+    color: var(--color-silver);
+    margin-bottom: 20px;
   }
   .cta-btn {
     display: inline-flex;
@@ -71,4 +264,9 @@ import PublicLayout from '../../layouts/PublicLayout.astro'
     transition: opacity 150ms;
   }
   .cta-btn:hover { opacity: 0.88; }
+
+  @media (max-width: 800px) {
+    .member { grid-template-columns: 1fr; }
+    .member-photo-wrap { max-width: 420px; }
+  }
 </style>
